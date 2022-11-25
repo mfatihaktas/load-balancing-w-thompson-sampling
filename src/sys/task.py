@@ -2,8 +2,10 @@ class Task:
     def __init__(
         self,
         _id: str,
+        serv_time: float,
     ):
         self._id = _id
+        self.serv_time = serv_time
 
     def __repr__(self):
         # return (
@@ -12,4 +14,4 @@ class Task:
         #     ")"
         # )
 
-        return f"Message(id= {self._id})"
+        return f"Task(id= {self._id}, serv_time= {self.serv_time})"
