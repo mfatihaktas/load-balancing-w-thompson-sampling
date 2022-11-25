@@ -7,6 +7,8 @@ class Task:
         self._id = _id
         self.serv_time = serv_time
 
+        self.node_id = None
+
     def __repr__(self):
         # return (
         #     "Msg( \n"

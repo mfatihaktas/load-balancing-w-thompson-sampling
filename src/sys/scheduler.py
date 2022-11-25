@@ -13,13 +13,12 @@ class Scheduler(node.Node):
         env: simpy.Environment,
         _id: str,
         node_list: list[node.Node],
+        sching_agent: agent.SchingAgent,
     ):
         super().__init__(env=env, _id=_id)
-
+        self.sching_agent = sching_agent
         self.id_to_node_map = {node._id: node for node in node_list}
 
-        # TODO: Add TS-based sching algo.
-        self.sching_algo = None
         self.num_tasks_sched = 0
 
     def __repr__(self):
