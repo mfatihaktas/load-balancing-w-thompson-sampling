@@ -8,6 +8,7 @@ packages = [{include = "thompson_sampling"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
+simpy = "^4.0.1"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -59,7 +60,7 @@ exclude = [
 minversion = "6.1"
 log_cli = true
 log_cli_level = "DEBUG"
-log_cli_format = "%(levelname)s:%(filename)s:%(lineno)s-%(funcName)s: %(message)s"
+log_cli_format = "%(levelname)s] %(file_name)s:%(line_number)s - %(func_name)s: %(message)s"
 log_cli_date_format = "%Y-%m-%d %H:%M:%S"
 testpaths = [
     "tests",
