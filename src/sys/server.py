@@ -12,11 +12,13 @@ class Server(node.Node):
         self,
         env: simpy.Environment,
         _id: str,
+        sink: node.Node,
     ):
         super().__init__(env=env, _id=_id)
+        self.sink = sink
 
         self.task_store = simpy.Store(env)
-        self.process_recv_tasks = env.process(self.recv_tasks())
+        self.recv_tasks_proc = env.process(self.recv_tasks())
 
     def __repr__(self):
         # return (
@@ -35,17 +37,17 @@ class Server(node.Node):
     def recv_tasks(self):
         slog(DEBUG, self.env, self, "started")
 
-        num_tasks_recved = 0
+        num_tasks_proced = 0
         while True:
             task = yield self.task_store.get()
-            num_tasks_recved += 1
-            slog(
-                DEBUG,
-                self.env,
-                self,
+            yield self.env.timeout(task.serv_time)
+
+            num_tasks_proced += 1
+            slog(DEBUG, self.env, self,
                 "processed",
-                num_tasks_recved=num_tasks_recved,
                 task=task,
+                num_tasks_proced=num_tasks_proced,
+                queue_len=len(self.task_store),
             )
 
         slog(DEBUG, self.env, self, "done")
