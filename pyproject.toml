@@ -9,6 +9,7 @@ packages = [{include = "thompson_sampling"}]
 [tool.poetry.dependencies]
 python = "^3.11"
 simpy = "^4.0.1"
+numpy = "^1.23.5"
 
 
 [tool.poetry.group.dev.dependencies]
