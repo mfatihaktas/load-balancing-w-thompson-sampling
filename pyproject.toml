@@ -10,6 +10,57 @@ packages = [{include = "thompson_sampling"}]
 python = "^3.11"
 
 
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.2.0"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 120
+target-version = ["py39"]
+exclude = '''
+/(
+    \.git
+  | \.venv
+  | \.direnv
+  | _build
+  | build
+  | dist
+  | \.env
+  | \.vscode
+  | \.cache
+  | github
+  | __pycache__
+  | .cloudignore
+)/
+'''
+
+[tool.flake8]
+max-line-length = 100
+max-complexity = 18
+docstring-convention = "google"
+select = ["A", "B", "C", "D", "E", "F", "W"]
+ignore = ["B950", "D1", "E203", "E221", "E501", "W503", "E231"]
+per-file-ignores = [
+    "__init__.py : F401",
+]
+exclude = [
+    # No need to traverse our git dirs
+    ".git", ".github",
+    # No value in checking cache dirs
+    "__pycache__",
+    # No need to check virtualenvs
+    ".env", ".venv", ".direnv",
+]
+
+[tool.pytest.ini_options]
+minversion = "6.1"
+log_cli = true
+log_cli_level = "DEBUG"
+log_cli_format = "%(levelname)s:%(filename)s:%(lineno)s-%(funcName)s: %(message)s"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+testpaths = [
+    "tests",
+]
