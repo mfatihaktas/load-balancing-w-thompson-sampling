@@ -55,3 +55,7 @@ def test_scheduler_ts_sliding_win(
         node_list=server_list,
         sching_agent=sching_agent,
     )
+    sink.sching_agent = sching_agent
+    sink.num_tasks_to_recv = 10
+
+    env.run(until=sink.recv_tasks_proc)
