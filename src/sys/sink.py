@@ -13,7 +13,7 @@ class Sink(node.Node):
         self,
         env: simpy.Environment,
         _id: str,
-        sching_agent: agent.SchingAgent,
+        sching_agent: agent.SchingAgent = None,
     ):
         super().__init__(env=env, _id=_id)
         self.sching_agent = sching_agent
@@ -38,6 +38,7 @@ class Sink(node.Node):
             num_tasks_recved += 1
             slog(DEBUG, self.env, self, "recved", task=task, num_tasks_recved=num_tasks_recved)
 
-            self.sching_agent.record_cost(node_id=task.node_id, cost=task.response_time)
+            if self.sching_agent:
+                self.sching_agent.record_cost(node_id=task.node_id, cost=task.response_time)
 
         slog(DEBUG, self.env, self, "done")

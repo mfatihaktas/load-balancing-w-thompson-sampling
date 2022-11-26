@@ -10,7 +10,7 @@ plot.rcParams.update(
 )
 import itertools
 
-from src.debug_utils import *
+from src.utils.debug import *
 
 
 NICE_BLUE = "#66b3ff"
