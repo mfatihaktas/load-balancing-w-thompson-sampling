@@ -1,18 +1,19 @@
 import simpy
 
 from src.utils.debug import *
-from src.sim import (
-    node,
+from src.agent import agent
+from src.sys import (
+    node as node_module,
     task as task_module,
 )
 
 
-class Scheduler(node.Node):
+class Scheduler(node_module.Node):
     def __init__(
         self,
         env: simpy.Environment,
         _id: str,
-        node_list: list[node.Node],
+        node_list: list[node_module.Node],
         sching_agent: agent.SchingAgent,
     ):
         super().__init__(env=env, _id=_id)
@@ -39,7 +40,7 @@ class Scheduler(node.Node):
     def schedule(self, task: task_module.Task):
         slog(DEBUG, self.env, self, "started")
 
-        node_id = self.sching_algo.node_to_schedule(task=task)
+        node_id = self.sching_agent.node_to_schedule(task=task)
 
         self.id_to_node_map[node_id].put(task)
         slog(DEBUG, self.env, self, "scheduled task",

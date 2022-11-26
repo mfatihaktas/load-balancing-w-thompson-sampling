@@ -1,7 +1,7 @@
 import simpy
 
 from src.utils.debug import *
-from src.sim import (
+from src.sys import (
     node,
     task as task_module,
 )

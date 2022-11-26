@@ -1,11 +1,11 @@
 import simpy
 
-from src.debug_utils import *
-from src.sim import (
-    agent,
+from src.agent import agent
+from src.sys import (
     node,
     task as task_module,
 )
+from src.utils.debug import *
 
 
 class Sink(node.Node):

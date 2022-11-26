@@ -41,6 +41,7 @@ def server_list(
 
 
 def test_scheduler_ts_sliding_win(
+    env: simpy.Environment,
     server_list: list[server_module.Server],
     sink: sink_module.Sink,
 ) -> list[server_module.Server]:

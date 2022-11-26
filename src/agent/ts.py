@@ -1,4 +1,5 @@
 import abc
+import collections
 import numpy
 
 from src.agent import agent
@@ -10,7 +11,7 @@ class ThompsonSampling_slidingWin_Gaussian(agent.SchingAgent):
 
         self.win_len = win_len
 
-        self.node_id_cost_queue = deque(maxlen=win_len)
+        self.node_id_cost_queue = collections.deque(maxlen=win_len)
         for node_id in self.node_id_list:
             self.node_id_cost_queue.append((node_id, 0))
 
