@@ -3,10 +3,11 @@ import collections
 import numpy
 
 from src.agent import agent
+from src.utils.debug import *
 
 
 class ThompsonSampling_slidingWin_Gaussian(agent.SchingAgent):
-    def __init__(self, node_id_list, win_len):
+    def __init__(self, node_id_list: list[str], win_len: int):
         super().__init__(node_id_list=node_id_list)
 
         self.win_len = win_len
@@ -28,15 +29,15 @@ class ThompsonSampling_slidingWin_Gaussian(agent.SchingAgent):
         log(DEBUG, "recorded", node_id=node_id, cost=cost)
 
     def node_to_schedule(self) -> str:
-        node_id_to_costs_map = defaultdict(list)
+        node_id_to_costs_map = collections.defaultdict(list)
         for (node_id, cost) in self.node_id_cost_queue:
             node_id_to_costs_map[node_id].append(cost)
         log(DEBUG, "", node_id_to_costs_map=node_id_to_costs_map)
 
         node_id, min_sample = None, float("Inf")
         for node_id, cost_list in node_id_to_costs_map.items():
-            mean = np.mean(cost_list) if len(cost_list) else 0
-            stdev = np.std(cost_list) if len(cost_list) else 1
+            mean = numpy.mean(cost_list) if len(cost_list) else 0
+            stdev = numpy.std(cost_list) if len(cost_list) else 1
             check(stdev >= 0, "Stdev cannot be negative")
             if stdev == 0:
                 stdev = 1

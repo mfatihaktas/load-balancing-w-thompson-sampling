@@ -49,7 +49,7 @@ class Source(node.Node):
             )
             yield self.env.timeout(inter_msg_gen_time)
 
-            task = task_module.Task(_id=task_id, serv_time=self.task_service_time_rv.sample())
+            task = task_module.Task(_id=task_id, service_time=self.task_service_time_rv.sample())
 
             slog(DEBUG, self.env, self, "sending", task=task)
             self.next_hop.put(task)

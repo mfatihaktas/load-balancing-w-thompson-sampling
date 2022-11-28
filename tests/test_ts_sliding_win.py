@@ -11,6 +11,7 @@ from src.agent import (
     agent as agent_module,
     ts as ts_module,
 )
+from src.prob import random_variable
 
 from src.utils.debug import *
 
@@ -47,7 +48,7 @@ def test_scheduler_ts_sliding_win(
     sink: sink_module.Sink,
 ) -> list[server_module.Server]:
     sching_agent = ts_module.ThompsonSampling_slidingWin_Gaussian(
-        node_id_list=server_list,
+        node_id_list=[s._id for s in server_list],
         win_len=100,
     )
 
@@ -58,11 +59,11 @@ def test_scheduler_ts_sliding_win(
         sching_agent=sching_agent,
     )
 
-    source = source_module.Source:
+    source = source_module.Source(
         env=env,
         _id="source",
-        inter_msg_gen_time_rv: random_variable.RandomVariable,
-        task_service_time_rv: random_variable.RandomVariable,
+        inter_msg_gen_time_rv=random_variable.Exponential(mu=1),
+        task_service_time_rv=random_variable.DiscreteUniform(min_value=1, max_value=1),
         next_hop=scher,
     )
 
