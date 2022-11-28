@@ -2,10 +2,10 @@ class Task:
     def __init__(
         self,
         _id: str,
-        serv_time: float,
+        service_time: float,
     ):
         self._id = _id
-        self.serv_time = serv_time
+        self.service_time = service_time
 
         self.node_id = None
 
@@ -16,4 +16,4 @@ class Task:
         #     ")"
         # )
 
-        return f"Task(id= {self._id}, serv_time= {self.serv_time})"
+        return f"Task(id= {self._id}, service_time= {self.service_time})"

@@ -5,6 +5,7 @@ from src.sys import (
     scheduler as scheduler_module,
     server as server_module,
     sink as sink_module,
+    source as source_module,
 )
 from src.agent import (
     agent as agent_module,
@@ -50,12 +51,21 @@ def test_scheduler_ts_sliding_win(
         win_len=100,
     )
 
-    scheduler_module.Scheduler(
+    scher = scheduler_module.Scheduler(
         env=env,
         _id="scher",
         node_list=server_list,
         sching_agent=sching_agent,
     )
+
+    source = source_module.Source:
+        env=env,
+        _id="source",
+        inter_msg_gen_time_rv: random_variable.RandomVariable,
+        task_service_time_rv: random_variable.RandomVariable,
+        next_hop=scher,
+    )
+
     sink.sching_agent = sching_agent
     sink.num_tasks_to_recv = 10
 
