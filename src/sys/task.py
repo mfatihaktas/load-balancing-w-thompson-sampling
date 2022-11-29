@@ -3,9 +3,11 @@ class Task:
         self,
         _id: str,
         service_time: float,
+        arrival_time: float,
     ):
         self._id = _id
         self.service_time = service_time
+        self.arrival_time = arrival_time
 
         self.node_id = None
 

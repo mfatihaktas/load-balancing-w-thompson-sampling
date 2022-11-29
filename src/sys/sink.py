@@ -41,7 +41,8 @@ class Sink(node.Node):
             slog(DEBUG, self.env, self, "recved", task=task, num_tasks_recved=num_tasks_recved)
 
             if self.sching_agent:
-                self.sching_agent.record_cost(node_id=task.node_id, cost=task.response_time)
+                response_time = self.env.now - task.arrival_time
+                self.sching_agent.record_cost(node_id=task.node_id, cost=response_time)
 
             if num_tasks_recved >= self.num_tasks_to_recv:
                 slog(DEBUG, self.env, self, "recved requested # tasks", num_tasks_recved=num_tasks_recved)

@@ -32,6 +32,7 @@ class Server(node.Node):
     def put(self, task: task_module.Task):
         slog(DEBUG, self.env, self, "recved", task=task)
 
+        task.node_id = self._id
         self.task_store.put(task)
 
     def recv_tasks(self):
