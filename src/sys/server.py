@@ -40,14 +40,16 @@ class Server(node.Node):
         num_tasks_proced = 0
         while True:
             task = yield self.task_store.get()
-            yield self.env.timeout(task.serv_time)
+            yield self.env.timeout(task.service_time)
 
             num_tasks_proced += 1
             slog(DEBUG, self.env, self,
                 "processed",
                 task=task,
                 num_tasks_proced=num_tasks_proced,
-                queue_len=len(self.task_store),
+                queue_len=len(self.task_store.items),
             )
+
+            self.sink.put(task)
 
         slog(DEBUG, self.env, self, "done")
