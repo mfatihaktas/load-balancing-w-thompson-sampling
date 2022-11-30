@@ -47,7 +47,7 @@ def test_scheduler_ts_sliding_win(
     server_list: list[server_module.Server],
     sink: sink_module.Sink,
 ) -> list[server_module.Server]:
-    sching_agent = ts_module.ThompsonSampling_slidingWin_Gaussian(
+    sching_agent = ts_module.ThompsonSampling_slidingWin(
         node_id_list=[s._id for s in server_list],
         win_len=100,
     )
