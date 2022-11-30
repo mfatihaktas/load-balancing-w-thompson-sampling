@@ -68,6 +68,6 @@ def test_scheduler_ts_sliding_win(
     )
 
     sink.sching_agent = sching_agent
-    sink.num_tasks_to_recv = 10
+    sink.num_tasks_to_recv = 100
 
     env.run(until=sink.recv_tasks_proc)

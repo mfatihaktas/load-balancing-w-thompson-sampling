@@ -13,8 +13,6 @@ class ThompsonSampling_slidingWin_Gaussian(agent.SchingAgent):
         self.win_len = win_len
 
         self.node_id_cost_queue = collections.deque(maxlen=win_len)
-        for node_id in self.node_id_list:
-            self.node_id_cost_queue.append((node_id, 0))
 
     def __repr__(self):
         return (
@@ -29,12 +27,19 @@ class ThompsonSampling_slidingWin_Gaussian(agent.SchingAgent):
         log(DEBUG, "recorded", node_id=node_id, cost=cost)
 
     def node_to_schedule(self) -> str:
+        # Construct `node_id_to_costs_map`
         node_id_to_costs_map = collections.defaultdict(list)
         for (node_id, cost) in self.node_id_cost_queue:
             node_id_to_costs_map[node_id].append(cost)
+
+        for node_id in self.node_id_list:
+            if node_id not in node_id_to_costs_map:
+                node_id_to_costs_map[node_id].append(0)
+
         log(DEBUG, "", node_id_to_costs_map=node_id_to_costs_map)
 
-        node_id, min_sample = None, float("Inf")
+        # Choose the node with min cost sample
+        node_id_w_min_sample, min_sample = None, float("Inf")
         for node_id, cost_list in node_id_to_costs_map.items():
             mean = numpy.mean(cost_list) if len(cost_list) else 0
             stdev = numpy.std(cost_list) if len(cost_list) else 1
@@ -45,7 +50,7 @@ class ThompsonSampling_slidingWin_Gaussian(agent.SchingAgent):
             s = numpy.random.normal(loc=mean, scale=stdev)
             if s < min_sample:
                 min_sample = s
-                node_id = node_id
-                # log(DEBUG, "s < min_sample", s=s, min_sample=min_sample, node_id=node_id)
+                node_id_w_min_sample = node_id
+                # log(DEBUG, "s < min_sample", s=s, min_sample=min_sample, node_id_w_min_sample=node_id_w_min_sample)
 
-        return node_id
+        return node_id_w_min_sample
