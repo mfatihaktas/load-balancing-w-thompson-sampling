@@ -13,13 +13,13 @@ class Source(node.Node):
         self,
         env: simpy.Environment,
         _id: str,
-        inter_msg_gen_time_rv: random_variable.RandomVariable,
+        inter_task_gen_time_rv: random_variable.RandomVariable,
         task_service_time_rv: random_variable.RandomVariable,
         next_hop: node.Node,
         num_msgs_to_send: int = None,
     ):
         super().__init__(env=env, _id=_id)
-        self.inter_msg_gen_time_rv = inter_msg_gen_time_rv
+        self.inter_task_gen_time_rv = inter_task_gen_time_rv
         self.task_service_time_rv = task_service_time_rv
         self.next_hop = next_hop
         self.num_msgs_to_send = num_msgs_to_send
@@ -32,7 +32,7 @@ class Source(node.Node):
         #     f"{super().__repr__()} \n"
         #     f"\t dst_id= {self.dst_id} \n"
         #     f"\t num_msgs_to_send= {self.num_msgs_to_send} \n"
-        #     f"\t inter_msg_gen_time_rv= {self.inter_msg_gen_time_rv} \n"
+        #     f"\t inter_task_gen_time_rv= {self.inter_task_gen_time_rv} \n"
         #     ")"
         # )
 
@@ -43,7 +43,7 @@ class Source(node.Node):
 
         task_id = 0
         while True:
-            inter_msg_gen_time = self.inter_msg_gen_time_rv.sample()
+            inter_msg_gen_time = self.inter_task_gen_time_rv.sample()
             slog(DEBUG, self.env, self, "waiting",
                  inter_msg_gen_time=inter_msg_gen_time
             )

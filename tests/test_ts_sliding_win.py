@@ -12,6 +12,7 @@ from src.agent import (
     ts as ts_module,
 )
 from src.prob import random_variable
+from src.sim import sim
 
 from src.utils.debug import *
 
@@ -46,28 +47,18 @@ def test_scheduler_ts_sliding_win(
     env: simpy.Environment,
     server_list: list[server_module.Server],
     sink: sink_module.Sink,
-) -> list[server_module.Server]:
+):
     sching_agent = ts_module.ThompsonSampling_slidingWin(
         node_id_list=[s._id for s in server_list],
         win_len=100,
     )
 
-    scher = scheduler_module.Scheduler(
+    sim.sim(
         env=env,
-        _id="scher",
-        node_list=server_list,
+        server_list=server_list,
+        sink=sink,
         sching_agent=sching_agent,
-    )
-
-    source = source_module.Source(
-        env=env,
-        _id="source",
-        inter_msg_gen_time_rv=random_variable.Exponential(mu=1),
+        inter_task_gen_time_rv=random_variable.Exponential(mu=1),
         task_service_time_rv=random_variable.DiscreteUniform(min_value=1, max_value=1),
-        next_hop=scher,
+        num_tasks_to_recv=100,
     )
-
-    sink.sching_agent = sching_agent
-    sink.num_tasks_to_recv = 100
-
-    env.run(until=sink.recv_tasks_proc)
