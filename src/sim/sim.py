@@ -2,6 +2,8 @@ import dataclasses
 import numpy
 import simpy
 
+from typing import Callable
+
 from src.sys import (
     scheduler as scheduler_module,
     server as server_module,
@@ -23,26 +25,21 @@ class SimResult:
     std_T: float
 
 
-def get_servers(
-    env: simpy.Environment,
-    num_servers: int,
-) -> server_module.Server:
-    return [
-        server_module.Server(env=env, _id=f"s{i}") for i in range(num_servers)
-    ]
-
-
 def sim(
     env: simpy.Environment,
-    server_list: server_module.Server,
-    sching_agent: agent_module.SchingAgent,
+    num_servers: int,
     inter_task_gen_time_rv: random_variable.RandomVariable,
     task_service_time_rv: random_variable.RandomVariable,
     num_tasks_to_recv: int,
+    sching_agent_given_server_list: Callable[[list[server_module.Server]], agent_module.SchingAgent],
 ) -> SimResult:
     sink = sink_module.Sink(env=env, _id="sink")
-    for server in server_list:
-        server.sink = sink
+
+    server_list = [
+        server_module.Server(env=env, _id=f"s{i}", sink=sink) for i in range(num_servers)
+    ]
+
+    sching_agent = sching_agent_given_server_list(server_list=server_list)
 
     scher = scheduler_module.Scheduler(
         env=env,

@@ -31,19 +31,18 @@ def test_ThompsonSampling_slidingWin(
     env: simpy.Environment,
     num_servers: int,
 ):
-    server_list = sim.get_servers(env=env, num_servers=num_servers)
-
-    sching_agent = ts_module.ThompsonSampling_slidingWin(
-        node_id_list=[s._id for s in server_list],
-        win_len=100,
-    )
+    def ts_sliding_win(server_list: list[server_module.Server]):
+        return ts_module.ThompsonSampling_slidingWin(
+            node_id_list=[s._id for s in server_list],
+            win_len=100,
+        )
 
     sim_result = sim.sim(
         env=env,
-        server_list=server_list,
-        sching_agent=sching_agent,
+        num_servers=num_servers,
         inter_task_gen_time_rv=random_variable.Exponential(mu=1),
         task_service_time_rv=random_variable.DiscreteUniform(min_value=1, max_value=1),
         num_tasks_to_recv=100,
+        sching_agent_given_server_list=ts_sliding_win,
     )
     log(INFO, "", sim_result=sim_result)
