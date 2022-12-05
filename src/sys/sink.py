@@ -23,6 +23,8 @@ class Sink(node.Node):
         self.task_store = simpy.Store(env)
         self.recv_tasks_proc = env.process(self.recv_tasks())
 
+        self.task_response_time_list = []
+
     def __repr__(self):
         return f"Sink(id= {self._id})"
 
@@ -42,6 +44,8 @@ class Sink(node.Node):
 
             if self.sching_agent:
                 response_time = self.env.now - task.arrival_time
+                self.task_response_time_list.append(response_time)
+
                 self.sching_agent.record_cost(node_id=task.node_id, cost=response_time)
 
             if num_tasks_recved >= self.num_tasks_to_recv:

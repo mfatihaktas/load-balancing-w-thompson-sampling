@@ -12,7 +12,7 @@ class Server(node.Node):
         self,
         env: simpy.Environment,
         _id: str,
-        sink: node.Node,
+        sink: node.Node = None,
     ):
         super().__init__(env=env, _id=_id)
         self.sink = sink
