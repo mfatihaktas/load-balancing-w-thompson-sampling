@@ -92,7 +92,7 @@ def test_ThompsonSampling_slidingWin_vs_slidingWinForEachNode(
     inter_task_gen_time_rv: random_variable.RandomVariable,
     task_service_time_rv: random_variable.RandomVariable,
 ):
-    num_tasks_to_recv = 100
+    num_tasks_to_recv = 10000
     def sim_(win_len: int):
         def ts_sliding_win(server_list: list[server_module.Server]):
             return ts_module.ThompsonSampling_slidingWin(
@@ -130,16 +130,12 @@ def test_ThompsonSampling_slidingWin_vs_slidingWinForEachNode(
     win_len_list = []
     ET_slidingWin_list, ET_slidingWinForEachNode_list = [], []
     std_T_slidingWin_list, std_T_slidingWinForEachNode_list = [], []
-    for win_len in [100]: # [10, 100, 1000]:
-        logger.info(f">> win_len= {win_len}")
+    for win_len in [10, 100, 1000]:
+        log(INFO, f">> win_len= {win_len}")
         win_len_list.append(win_len)
 
         sim_result_for_slidingWin, sim_result_for_slidingWinForEachNode = sim_(win_len=win_len)
-        logger.info(
-            "\n"
-            f"sim_result_for_slidingWin= {sim_result_for_slidingWin} \n"
-            f"sim_result_for_slidingWinForEachNode= {sim_result_for_slidingWinForEachNode}"
-        )
+        log(INFO, "", sim_result_for_slidingWin=sim_result_for_slidingWin, sim_result_for_slidingWinForEachNode=sim_result_for_slidingWinForEachNode)
 
         ET_slidingWin_list.append(sim_result_for_slidingWin.ET)
         std_T_slidingWin_list.append(sim_result_for_slidingWin.std_T)

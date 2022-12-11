@@ -44,7 +44,7 @@ LOGGING_FORMAT = (
 formatter = logging.Formatter(LOGGING_FORMAT)
 # formatter = CustomFormatter()
 
-LOGGER_NAME = "deanonymize-tor"
+LOGGER_NAME = "thompson-sampling"
 # logging.basicConfig(level=logging.INFO) #, format=LOGGING_FORMAT)
 logger = logging.getLogger(LOGGER_NAME)
 logger.setLevel(logging.DEBUG)
@@ -70,8 +70,8 @@ ERROR = 3
 CRITICAL = 4
 
 level_log_m = {
-    INFO: logger.info,
     DEBUG: logger.debug,
+    INFO: logger.info,
     WARNING: logger.warning,
     ERROR: logger.error,
     CRITICAL: logger.critical,
