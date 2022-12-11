@@ -29,6 +29,9 @@ class Server(node.Node):
 
         return f"Server(id= {self._id})"
 
+    def work_left(self):
+        return sum(task.service_time for task in self.task_store.items)
+
     def put(self, task: task_module.Task):
         slog(DEBUG, self.env, self, "recved", task=task)
 

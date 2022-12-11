@@ -63,14 +63,14 @@ def sim(
     )
 
 
-def test_ThompsonSampling_slidingWin(
+def test_AssignWithThompsonSampling_slidingWin(
     env: simpy.Environment,
     num_servers: int,
     inter_task_gen_time_rv: random_variable.RandomVariable,
     task_service_time_rv: random_variable.RandomVariable,
 ):
     def ts_sliding_win(server_list: list[server_module.Server]):
-        return ts_module.ThompsonSampling_slidingWin(
+        return ts_module.AssignWithThompsonSampling_slidingWin(
             node_id_list=[s._id for s in server_list],
             win_len=100,
         )
@@ -86,7 +86,7 @@ def test_ThompsonSampling_slidingWin(
     log(INFO, "", sim_result=sim_result)
 
 
-def test_ThompsonSampling_slidingWin_vs_slidingWinForEachNode(
+def test_AssignWithThompsonSampling_slidingWin_vs_slidingWinForEachNode(
     env: simpy.Environment,
     num_servers: int,
     inter_task_gen_time_rv: random_variable.RandomVariable,
@@ -95,13 +95,13 @@ def test_ThompsonSampling_slidingWin_vs_slidingWinForEachNode(
     num_tasks_to_recv = 10000
     def sim_(win_len: int):
         def ts_sliding_win(server_list: list[server_module.Server]):
-            return ts_module.ThompsonSampling_slidingWin(
+            return ts_module.AssignWithThompsonSampling_slidingWin(
                 node_id_list=[s._id for s in server_list],
                 win_len=win_len,
             )
 
         def ts_sliding_win_for_each_node(server_list: list[server_module.Server]):
-            return ts_module.ThompsonSampling_slidingWinForEachNode(
+            return ts_module.AssignWithThompsonSampling_slidingWinForEachNode(
                 node_id_list=[s._id for s in server_list],
                 win_len=win_len,
             )
@@ -157,7 +157,7 @@ def test_ThompsonSampling_slidingWin_vs_slidingWinForEachNode(
         f"$S= {task_service_time_rv.to_latex()}$"
     )
     plot.gcf().set_size_inches(6, 4)
-    plot.savefig("plot_ThompsonSampling_slidingWin_vs_slidingWinForEachNode_ET_vs_w.png", bbox_inches="tight")
+    plot.savefig("plot_AssignWithThompsonSampling_slidingWin_vs_slidingWinForEachNode_ET_vs_w.png", bbox_inches="tight")
     plot.gcf().clear()
 
     log(INFO, "Done")

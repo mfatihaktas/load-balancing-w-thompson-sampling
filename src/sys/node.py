@@ -10,3 +10,7 @@ class Node:
 
     def __repr__(self):
         return "Node( \n" f"\t id= {self._id} \n" ")"
+
+    @abc.abstractmethod
+    def work_left(self):
+        return

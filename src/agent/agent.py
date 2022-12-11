@@ -17,5 +17,5 @@ class SchingAgent(abc.ABC):
         return None
 
     @abc.abstractmethod
-    def node_to_schedule(self) -> str:
+    def node_to_assign(self) -> node.None:
         return None

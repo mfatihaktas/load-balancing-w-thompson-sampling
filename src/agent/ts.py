@@ -1,13 +1,13 @@
-import abc
 import collections
 import numpy
 
 from src.agent import agent
 from src.prob import random_variable
+from src.sys import node
 from src.utils.debug import *
 
 
-class ThompsonSampling_slidingWin(agent.SchingAgent):
+class AssignWithThompsonSampling_slidingWin(agent.SchingAgent):
     def __init__(self, node_id_list: list[str], win_len: int):
         super().__init__(node_id_list=node_id_list)
 
@@ -17,7 +17,7 @@ class ThompsonSampling_slidingWin(agent.SchingAgent):
 
     def __repr__(self):
         return (
-            "ThompsonSampling_slidingWin( \n"
+            "AssignWithThompsonSampling_slidingWin( \n"
             f"{super().__repr__()} \n"
             f"\t win_len= {self.win_len} \n"
             ")"
@@ -27,7 +27,7 @@ class ThompsonSampling_slidingWin(agent.SchingAgent):
         self.node_id_cost_queue.append((node_id, cost))
         log(DEBUG, "recorded", node_id=node_id, cost=cost)
 
-    def node_to_schedule(self) -> str:
+    def node_to_assign(self) -> node.None:
         # Construct `node_id_to_costs_map`
         node_id_to_costs_map = collections.defaultdict(list)
         for (node_id, cost) in self.node_id_cost_queue:
@@ -57,7 +57,7 @@ class ThompsonSampling_slidingWin(agent.SchingAgent):
         return node_id_w_min_sample
 
 
-class ThompsonSampling_slidingWinForEachNode(agent.SchingAgent):
+class AssignWithThompsonSampling_slidingWinForEachNode(agent.SchingAgent):
     def __init__(self, node_id_list: list[str], win_len: int):
         super().__init__(node_id_list=node_id_list)
 
@@ -67,7 +67,7 @@ class ThompsonSampling_slidingWinForEachNode(agent.SchingAgent):
 
     def __repr__(self):
         return (
-            "ThompsonSampling_slidingWinForEachNode( \n"
+            "AssignWithThompsonSampling_slidingWinForEachNode( \n"
             f"{super().__repr__()} \n"
             f"\t win_len= {self.win_len} \n"
             ")"
@@ -77,7 +77,7 @@ class ThompsonSampling_slidingWinForEachNode(agent.SchingAgent):
         self.node_id_to_cost_queue_map[node_id].append(cost)
         log(DEBUG, "recorded", node_id=node_id, cost=cost)
 
-    def node_to_schedule(self) -> str:
+    def node_to_assign(self) -> node.None:
         log(DEBUG, "", node_id_to_cost_queue_map=self.node_id_to_cost_queue_map)
 
         # Choose the node with min cost sample
