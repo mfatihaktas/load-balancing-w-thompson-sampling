@@ -1,9 +1,9 @@
 import simpy
 
-from src.sim import sim as sim_module
-from src.sys import server as server_module
 from src.agent import ts as ts_module
 from src.prob import random_variable
+from src.sim import sim as sim_module
+from src.sys import server as server_module
 
 from src.utils.debug import *
 from src.utils.plot import *
@@ -38,7 +38,7 @@ def test_AssignWithThompsonSampling_slidingWin_vs_slidingWinForEachNode(
     inter_task_gen_time_rv: random_variable.RandomVariable,
     task_service_time_rv: random_variable.RandomVariable,
 ):
-    num_tasks_to_recv = 10
+    num_tasks_to_recv = 1000
     def sim_(win_len: int):
         def ts_sliding_win(server_list: list[server_module.Server]):
             return ts_module.AssignWithThompsonSampling_slidingWin(
@@ -67,7 +67,7 @@ def test_AssignWithThompsonSampling_slidingWin_vs_slidingWinForEachNode(
             inter_task_gen_time_rv=inter_task_gen_time_rv,
             task_service_time_rv=task_service_time_rv,
             num_tasks_to_recv=num_tasks_to_recv,
-            sching_agent_given_server_list=ts_sliding_win,
+            sching_agent_given_server_list=ts_sliding_win_for_each_node,
         )
 
         return sim_result_for_slidingWin, sim_result_for_slidingWinForEachNode
