@@ -3,7 +3,6 @@ import numpy
 
 from src.agent import agent
 from src.prob import random_variable
-from src.sys import node
 from src.utils.debug import *
 
 
@@ -27,7 +26,7 @@ class AssignWithThompsonSampling_slidingWin(agent.SchingAgent):
         self.node_id_cost_queue.append((node_id, cost))
         log(DEBUG, "recorded", node_id=node_id, cost=cost)
 
-    def node_to_assign(self) -> node.None:
+    def node_to_assign(self):
         # Construct `node_id_to_costs_map`
         node_id_to_costs_map = collections.defaultdict(list)
         for (node_id, cost) in self.node_id_cost_queue:
@@ -77,7 +76,7 @@ class AssignWithThompsonSampling_slidingWinForEachNode(agent.SchingAgent):
         self.node_id_to_cost_queue_map[node_id].append(cost)
         log(DEBUG, "recorded", node_id=node_id, cost=cost)
 
-    def node_to_assign(self) -> node.None:
+    def node_to_assign(self):
         log(DEBUG, "", node_id_to_cost_queue_map=self.node_id_to_cost_queue_map)
 
         # Choose the node with min cost sample

@@ -1,5 +1,7 @@
 import abc
 
+from src.sys import node
+
 
 class SchingAgent(abc.ABC):
     def __init__(self, node_id_list: list[str]):
@@ -17,5 +19,5 @@ class SchingAgent(abc.ABC):
         return None
 
     @abc.abstractmethod
-    def node_to_assign(self) -> node.None:
+    def node_to_assign(self):
         return None
