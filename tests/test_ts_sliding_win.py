@@ -97,13 +97,13 @@ def test_ThompsonSampling_slidingWin_vs_slidingWinForEachNode(
         def ts_sliding_win(server_list: list[server_module.Server]):
             return ts_module.ThompsonSampling_slidingWin(
                 node_id_list=[s._id for s in server_list],
-                win_len=100,
+                win_len=win_len,
             )
 
         def ts_sliding_win_for_each_node(server_list: list[server_module.Server]):
             return ts_module.ThompsonSampling_slidingWinForEachNode(
                 node_id_list=[s._id for s in server_list],
-                win_len=100,
+                win_len=win_len,
             )
 
         sim_result_for_slidingWin = sim(
@@ -129,7 +129,8 @@ def test_ThompsonSampling_slidingWin_vs_slidingWinForEachNode(
     # Run the sim
     win_len_list = []
     ET_slidingWin_list, ET_slidingWinForEachNode_list = [], []
-    for win_len in [10, 100, 1000]:
+    std_T_slidingWin_list, std_T_slidingWinForEachNode_list = [], []
+    for win_len in [100]: # [10, 100, 1000]:
         logger.info(f">> win_len= {win_len}")
         win_len_list.append(win_len)
 
@@ -140,12 +141,27 @@ def test_ThompsonSampling_slidingWin_vs_slidingWinForEachNode(
             f"sim_result_for_slidingWinForEachNode= {sim_result_for_slidingWinForEachNode}"
         )
 
+        ET_slidingWin_list.append(sim_result_for_slidingWin.ET)
+        std_T_slidingWin_list.append(sim_result_for_slidingWin.std_T)
+
+        ET_slidingWinForEachNode_list.append(sim_result_for_slidingWinForEachNode.ET)
+        std_T_slidingWinForEachNode_list.append(sim_result_for_slidingWinForEachNode.std_T)
+
+    plot.errorbar(win_len_list, ET_slidingWin_list, yerr=std_T_slidingWin_list, color=next(dark_color_cycle), label="TS-SlidingWin", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+    plot.errorbar(win_len_list, ET_slidingWinForEachNode_list, yerr=std_T_slidingWinForEachNode_list, color=next(dark_color_cycle), label="TS-SlidingWinForEachNode", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+
     # Save the plot
     fontsize = 14
     plot.legend(fontsize=fontsize)
     plot.ylabel(r"$E[T]$", fontsize=fontsize)
     plot.xlabel(r"$w$", fontsize=fontsize)
-    plot.title(sim_config.get_plot_title())
+    plot.title(
+        (
+            f"$N= {num_servers}$, "
+            f"$X= {inter_task_gen_time_rv.to_latex()}$, "
+            f"$S= {task_service_time_rv.to_latex()}$"
+        )
+    )
     plot.gcf().set_size_inches(6, 4)
     plot.savefig("plot_ThompsonSampling_slidingWin_vs_slidingWinForEachNode_ET_vs_w.png", bbox_inches="tight")
     plot.gcf().clear()
