@@ -156,11 +156,9 @@ def test_ThompsonSampling_slidingWin_vs_slidingWinForEachNode(
     plot.ylabel(r"$E[T]$", fontsize=fontsize)
     plot.xlabel(r"$w$", fontsize=fontsize)
     plot.title(
-        (
-            f"$N= {num_servers}$, "
-            f"$X= {inter_task_gen_time_rv.to_latex()}$, "
-            f"$S= {task_service_time_rv.to_latex()}$"
-        )
+        f"$N= {num_servers}$, "
+        f"$X= {inter_task_gen_time_rv.to_latex()}$, "
+        f"$S= {task_service_time_rv.to_latex()}$"
     )
     plot.gcf().set_size_inches(6, 4)
     plot.savefig("plot_ThompsonSampling_slidingWin_vs_slidingWinForEachNode_ET_vs_w.png", bbox_inches="tight")
