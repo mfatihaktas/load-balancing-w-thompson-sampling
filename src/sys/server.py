@@ -17,6 +17,7 @@ class Server(node.Node):
         super().__init__(env=env, _id=_id)
         self.sink = sink
 
+        self.task_in_serv = None
         self.task_store = simpy.Store(env)
         self.recv_tasks_proc = env.process(self.recv_tasks())
 
@@ -29,7 +30,10 @@ class Server(node.Node):
 
         return f"Server(id= {self._id})"
 
-    def work_left(self):
+    def num_tasks_left(self) -> int:
+        return len(self.task_store) + int(self.task_in_serv is not None)
+
+    def work_left(self) -> float:
         return sum(task.service_time for task in self.task_store.items)
 
     def put(self, task: task_module.Task):
@@ -43,17 +47,18 @@ class Server(node.Node):
 
         num_tasks_proced = 0
         while True:
-            task = yield self.task_store.get()
-            yield self.env.timeout(task.service_time)
+            self.task_in_serv = yield self.task_store.get()
+            yield self.env.timeout(self.task_in_serv.service_time)
 
             num_tasks_proced += 1
             slog(DEBUG, self.env, self,
                 "processed",
-                task=task,
+                task_in_serv=self.task_in_serv,
                 num_tasks_proced=num_tasks_proced,
                 queue_len=len(self.task_store.items),
             )
 
-            self.sink.put(task)
+            self.sink.put(self.task_in_serv)
+            self.task_in_serv = None
 
         slog(DEBUG, self.env, self, "done")

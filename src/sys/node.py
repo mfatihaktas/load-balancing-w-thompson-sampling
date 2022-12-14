@@ -13,5 +13,9 @@ class Node:
         return "Node( \n" f"\t id= {self._id} \n" ")"
 
     @abc.abstractmethod
+    def num_tasks_left(self):
+        return
+
+    @abc.abstractmethod
     def work_left(self):
         return
