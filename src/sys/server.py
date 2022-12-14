@@ -31,7 +31,7 @@ class Server(node.Node):
         return f"Server(id= {self._id})"
 
     def num_tasks_left(self) -> int:
-        return len(self.task_store) + int(self.task_in_serv is not None)
+        return len(self.task_store.items) + int(self.task_in_serv is not None)
 
     def work_left(self) -> float:
         return sum(task.service_time for task in self.task_store.items)
