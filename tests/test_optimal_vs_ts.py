@@ -19,8 +19,9 @@ def test_optimal_vs_ts(
     task_service_time_rv: random_variable.RandomVariable,
 ):
     # Sim config variables
-    num_tasks_to_recv = 1000
+    num_tasks_to_recv = 10 # 1000
     win_len = 100
+    num_sim_runs = 3
 
     # Callbacks that return the sching agents
     def assign_w_ts_sliding_win(server_list: list[server_module.Server]):
@@ -52,6 +53,7 @@ def test_optimal_vs_ts(
                 task_service_time_rv=task_service_time_rv,
                 num_tasks_to_recv=num_tasks_to_recv,
                 sching_agent_given_server_list=sching_agent_given_server_list,
+                num_sim_runs=num_sim_runs,
             )
 
         sim_result_for_ts_sliding_win = sim_result(sching_agent_given_server_list=assign_w_ts_sliding_win)
@@ -72,7 +74,8 @@ def test_optimal_vs_ts(
     ET_to_least_work_left_list, ET_to_fewest_tasks_left_list = [], []
     std_T_ts_sliding_win_list, std_T_ts_sliding_win_for_each_node_list = [], []
     std_T_to_least_work_left_list, std_T_to_fewest_tasks_left_list = [], []
-    for arrival_rate in numpy.linspace(0.1, num_servers, num=4, endpoint=False):
+    # for arrival_rate in numpy.linspace(0.1, num_servers, num=4, endpoint=False):
+    for arrival_rate in [0.1]:
         log(INFO, f">> arrival_rate= {arrival_rate}")
         arrival_rate_list.append(arrival_rate)
 
@@ -112,10 +115,11 @@ def test_optimal_vs_ts(
     plot.ylabel(r"$E[T]$", fontsize=fontsize)
     plot.xlabel(r"$\lambda$", fontsize=fontsize)
     plot.title(
-        f"$N= {num_servers}$, "
-        r"$X \sim \mathbf{Exp}(\lambda)$, "
+        r"$N_{\textrm{server}}= $" + f"{num_servers}, "
+        r"$X \sim \textrm{Exp}(\lambda)$, "
         f"$S \sim {task_service_time_rv.to_latex()}$, "
-        f"$n= {num_tasks_to_recv}$"
+        r"$N_{\textrm{tasks}}= " + f"{num_tasks_to_recv}$, "
+        r"$N_{\textrm{sim}}= " + f"{num_sim_runs}$"
     )
     plot.gcf().set_size_inches(6, 4)
     plot.savefig("plot_optimal_vs_ts_ET_vs_lambda.png", bbox_inches="tight")
