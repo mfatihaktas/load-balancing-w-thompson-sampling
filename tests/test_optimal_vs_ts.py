@@ -35,7 +35,7 @@ def test_optimal_vs_ts(
             win_len=win_len,
         )
 
-    def assign_to_least_loaded(server_list: list[server_module.Server]):
+    def assign_to_least_work_left(server_list: list[server_module.Server]):
         return optimal_module.AssignToLeastWorkLeft(node_list=server_list)
 
     def sim_(arrival_rate: float):
@@ -53,12 +53,12 @@ def test_optimal_vs_ts(
 
         sim_result_for_ts_sliding_win = sim_result(sching_agent_given_server_list=assign_w_ts_sliding_win)
         sim_result_for_ts_sliding_win_for_each_node = sim_result(sching_agent_given_server_list=assign_w_ts_sliding_win_for_each_node)
-        sim_result_for_assign_to_least_loaded = sim_result(sching_agent_given_server_list=assign_to_least_loaded)
+        sim_result_for_assign_to_least_work_left = sim_result(sching_agent_given_server_list=assign_to_least_work_left)
 
         return (
             sim_result_for_ts_sliding_win,
             sim_result_for_ts_sliding_win_for_each_node,
-            sim_result_for_assign_to_least_loaded
+            sim_result_for_assign_to_least_work_left
         )
 
     # Run the sim
@@ -72,12 +72,12 @@ def test_optimal_vs_ts(
         (
             sim_result_for_ts_sliding_win,
             sim_result_for_ts_sliding_win_for_each_node,
-            sim_result_for_assign_to_least_loaded
+            sim_result_for_assign_to_least_work_left
         ) = sim_(arrival_rate=arrival_rate)
         log(INFO, "",
             sim_result_for_ts_sliding_win=sim_result_for_ts_sliding_win,
             sim_result_for_ts_sliding_win_for_each_node=sim_result_for_ts_sliding_win_for_each_node,
-            sim_result_for_assign_to_least_loaded=sim_result_for_assign_to_least_loaded,
+            sim_result_for_assign_to_least_work_left=sim_result_for_assign_to_least_work_left,
         )
 
         ET_ts_sliding_win_list.append(sim_result_for_ts_sliding_win.ET)
@@ -86,12 +86,12 @@ def test_optimal_vs_ts(
         ET_ts_sliding_win_for_each_node_list.append(sim_result_for_ts_sliding_win_for_each_node.ET)
         std_T_ts_sliding_win_for_each_node_list.append(sim_result_for_ts_sliding_win_for_each_node.std_T)
 
-        ET_to_least_loaded_list.append(sim_result_for_assign_to_least_loaded.ET)
-        std_T_to_least_loaded_list.append(sim_result_for_assign_to_least_loaded.std_T)
+        ET_to_least_work_left_list.append(sim_result_for_assign_to_least_work_left.ET)
+        std_T_to_least_work_left_list.append(sim_result_for_assign_to_least_work_left.std_T)
 
     plot.errorbar(arrival_rate_list, ET_ts_sliding_win_list, yerr=std_T_ts_sliding_win_list, color=next(dark_color_cycle), label="TS-SlidingWin", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
     plot.errorbar(arrival_rate_list, ET_ts_sliding_win_for_each_node_list, yerr=std_T_ts_sliding_win_for_each_node_list, color=next(dark_color_cycle), label="TS-SlidingWinForEachNode", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-    plot.errorbar(arrival_rate_list, ET_to_least_loaded_list, yerr=std_T_to_least_loaded_list, color=next(dark_color_cycle), label="AssignToLeastWorkLeft", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+    plot.errorbar(arrival_rate_list, ET_to_least_work_left_list, yerr=std_T_to_least_work_left_list, color=next(dark_color_cycle), label="AssignToLeastWorkLeft", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
     # Save the plot
     fontsize = 14
