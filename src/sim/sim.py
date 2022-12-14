@@ -32,35 +32,59 @@ def sim(
     task_service_time_rv: random_variable.RandomVariable,
     num_tasks_to_recv: int,
     sching_agent_given_server_list: Callable[[list[server_module.Server]], agent_module.SchingAgent],
+    num_runs: int = 1,
 ) -> SimResult:
-    sink = sink_module.Sink(env=env, _id="sink")
-
-    server_list = [
-        server_module.Server(env=env, _id=f"s{i}", sink=sink) for i in range(num_servers)
-    ]
-
-    sching_agent = sching_agent_given_server_list(server_list=server_list)
-
-    scher = scheduler_module.Scheduler(
-        env=env,
-        _id="scher",
-        node_list=server_list,
-        sching_agent=sching_agent,
-    )
-
-    source = source_module.Source(
-        env=env,
-        _id="source",
+    log(DEBUG, "Started",
+        num_servers=num_servers,
         inter_task_gen_time_rv=inter_task_gen_time_rv,
         task_service_time_rv=task_service_time_rv,
-        next_hop=scher,
+        num_tasks_to_recv=num_tasks_to_recv,
+        sching_agent_given_server_list=sching_agent_given_server_list,
+        num_runs=num_runs,
     )
 
-    sink.sching_agent = sching_agent
-    sink.num_tasks_to_recv = num_tasks_to_recv
+    def sim_run_once() -> list[float]:
+        sink = sink_module.Sink(env=env, _id="sink")
 
-    env.run(until=sink.recv_tasks_proc)
+        server_list = [
+            server_module.Server(env=env, _id=f"s{i}", sink=sink) for i in range(num_servers)
+        ]
 
-    ET = numpy.mean(sink.task_response_time_list)
-    std_T = numpy.std(sink.task_response_time_list)
+        sching_agent = sching_agent_given_server_list(server_list=server_list)
+
+        scher = scheduler_module.Scheduler(
+            env=env,
+            _id="scher",
+            node_list=server_list,
+            sching_agent=sching_agent,
+        )
+
+        source = source_module.Source(
+            env=env,
+            _id="source",
+            inter_task_gen_time_rv=inter_task_gen_time_rv,
+            task_service_time_rv=task_service_time_rv,
+            next_hop=scher,
+        )
+
+        sink.sching_agent = sching_agent
+        sink.num_tasks_to_recv = num_tasks_to_recv
+
+        env.run(until=sink.recv_tasks_proc)
+
+        return sink.task_response_time_list
+
+    task_response_time_list = []
+    for i in range(num_runs):
+        log(INFO, f">> sim-{i}")
+
+        task_response_time_list_ = sim_run_once()
+        ET = numpy.mean(sink.task_response_time_list_)
+        std_T = numpy.std(sink.task_response_time_list_)
+        log(INFO, "", ET=ET, std_T=std_T)
+
+        task_response_time_list.extend(task_response_time_list_)
+
+    ET = numpy.mean(task_response_time_list)
+    std_T = numpy.std(task_response_time_list)
     return SimResult(ET=ET, std_T=std_T)
