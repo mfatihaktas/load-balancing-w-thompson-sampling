@@ -13,57 +13,47 @@ from src.utils.debug import *
 from src.utils.plot import *
 
 
-def test_AssignToLeastWorkLeft_vs_AssignWithThompsonSampling(
+def test_optimal_vs_ts(
     env: simpy.Environment,
     num_servers: int,
     task_service_time_rv: random_variable.RandomVariable,
 ):
-    num_tasks_to_recv = 200
+    # Sim config variables
+    num_tasks_to_recv = 10 # 200
     win_len = 100
+
+    # Callbacks that return the sching agents
+    def assign_w_ts_sliding_win(server_list: list[server_module.Server]):
+        return ts_module.AssignWithThompsonSampling_slidingWin(
+            node_id_list=[s._id for s in server_list],
+            win_len=win_len,
+        )
+
+    def assign_w_ts_sliding_win_for_each_node(server_list: list[server_module.Server]):
+        return ts_module.AssignWithThompsonSampling_slidingWinForEachNode(
+            node_id_list=[s._id for s in server_list],
+            win_len=win_len,
+        )
+
+    def assign_to_least_loaded(server_list: list[server_module.Server]):
+        return optimal_module.AssignToLeastWorkLeft(node_list=server_list)
+
     def sim_(arrival_rate: float):
-        def assign_w_ts_sliding_win(server_list: list[server_module.Server]):
-            return ts_module.AssignWithThompsonSampling_slidingWin(
-                node_id_list=[s._id for s in server_list],
-                win_len=win_len,
-            )
-
-        def assign_w_ts_sliding_win_for_each_node(server_list: list[server_module.Server]):
-            return ts_module.AssignWithThompsonSampling_slidingWinForEachNode(
-                node_id_list=[s._id for s in server_list],
-                win_len=win_len,
-            )
-
-        def assign_to_least_loaded(server_list: list[server_module.Server]):
-            return optimal_module.AssignToLeastWorkLeft(node_list=server_list)
-
         inter_task_gen_time_rv = random_variable.Exponential(mu=arrival_rate)
 
-        sim_result_for_ts_sliding_win = sim_module.sim(
-            env=env,
-            num_servers=num_servers,
-            inter_task_gen_time_rv=inter_task_gen_time_rv,
-            task_service_time_rv=task_service_time_rv,
-            num_tasks_to_recv=num_tasks_to_recv,
-            sching_agent_given_server_list=assign_w_ts_sliding_win,
-        )
+        def sim_result(sching_agent_given_server_list):
+            return sim_module.sim(
+                env=env,
+                num_servers=num_servers,
+                inter_task_gen_time_rv=inter_task_gen_time_rv,
+                task_service_time_rv=task_service_time_rv,
+                num_tasks_to_recv=num_tasks_to_recv,
+                sching_agent_given_server_list=sching_agent_given_server_list,
+            )
 
-        sim_result_for_ts_sliding_win_for_each_node = sim_module.sim(
-            env=env,
-            num_servers=num_servers,
-            inter_task_gen_time_rv=inter_task_gen_time_rv,
-            task_service_time_rv=task_service_time_rv,
-            num_tasks_to_recv=num_tasks_to_recv,
-            sching_agent_given_server_list=assign_w_ts_sliding_win_for_each_node,
-        )
-
-        sim_result_for_assign_to_least_loaded = sim_module.sim(
-            env=env,
-            num_servers=num_servers,
-            inter_task_gen_time_rv=inter_task_gen_time_rv,
-            task_service_time_rv=task_service_time_rv,
-            num_tasks_to_recv=num_tasks_to_recv,
-            sching_agent_given_server_list=assign_to_least_loaded,
-        )
+        sim_result_for_ts_sliding_win = sim_result(sching_agent_given_server_list=assign_w_ts_sliding_win)
+        sim_result_for_ts_sliding_win_for_each_node = sim_result(sching_agent_given_server_list=assign_w_ts_sliding_win_for_each_node)
+        sim_result_for_assign_to_least_loaded = sim_result(sching_agent_given_server_list=assign_to_least_loaded)
 
         return (
             sim_result_for_ts_sliding_win,
@@ -114,7 +104,7 @@ def test_AssignToLeastWorkLeft_vs_AssignWithThompsonSampling(
         f"$S \sim {task_service_time_rv.to_latex()}$"
     )
     plot.gcf().set_size_inches(6, 4)
-    plot.savefig("plot_AssignToLeastWorkLeft_vs_AssignWithThompsonSampling_ET_vs_lambda.png", bbox_inches="tight")
+    plot.savefig("plot_optimal_vs_ts_ET_vs_lambda.png", bbox_inches="tight")
     plot.gcf().clear()
 
     log(INFO, "Done")
