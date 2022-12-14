@@ -1,18 +1,18 @@
 from src.agent import agent
 from src.sys import node
 
-class AssignToLeastLoaded(agent.SchingAgent):
+class AssignToLeastWorkLeft(agent.SchingAgent):
     def __init__(self, node_list: list[node.Node]):
         self.node_list = node_list
 
     def __repr__(self):
         return (
-            f"AssignToLeastLoaded( \n"
+            f"AssignToLeastWorkLeft( \n"
             f"\t num_nodes= {len(self.node_list)} \n"
             ")"
         )
 
-    def node_to_assign(self) -> node.Node:
+    def node_id_to_assign(self) -> str:
         node_w_least_work = None
         least_work = float("Inf")
         for node in self.node_list:
@@ -22,4 +22,4 @@ class AssignToLeastLoaded(agent.SchingAgent):
                 least_work = work_left
                 node_w_least_work = node
 
-        return node_w_least_work
+        return node_w_least_work._id

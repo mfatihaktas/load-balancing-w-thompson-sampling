@@ -46,7 +46,8 @@ class Sink(node.Node):
                 response_time = self.env.now - task.arrival_time
                 self.task_response_time_list.append(response_time)
 
-                self.sching_agent.record_cost(node_id=task.node_id, cost=response_time)
+                if isinstance(self.sching_agent, agent.SchingAgent_wOnlineLearning):
+                    self.sching_agent.record_cost(node_id=task.node_id, cost=response_time)
 
             if num_tasks_recved >= self.num_tasks_to_recv:
                 slog(DEBUG, self.env, self, "recved requested # tasks", num_tasks_recved=num_tasks_recved)

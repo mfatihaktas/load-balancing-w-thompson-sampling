@@ -39,7 +39,7 @@ class Scheduler(node_module.Node):
     def schedule(self, task: task_module.Task):
         slog(DEBUG, self.env, self, "started")
 
-        node_id = self.sching_agent.node_to_assign()
+        node_id = self.sching_agent.node_id_to_assign()
 
         slog(DEBUG, self.env, self, "will schedule task",
              num_tasks_sched=self.num_tasks_sched,
