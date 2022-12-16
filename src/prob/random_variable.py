@@ -151,7 +151,7 @@ class DiscreteUniform(RandomVariable):
         return f"DiscreteUniform({self.min_value}, {self.max_value})"
 
     def to_latex(self) -> str:
-        return "\textrm{Uniform}" + f"[{self.min_value}, {self.max_value}]"
+        return r"\textrm{Uniform}" + f"[{self.min_value}, {self.max_value}]"
 
     def mean(self) -> float:
         return (self.max_value + self.min_value) / 2
@@ -174,6 +174,29 @@ class DiscreteUniform(RandomVariable):
 
     def sample(self) -> float:
         return self.dist.rvs()  # [0]
+
+
+class CustomDiscrete(RandomVariable):
+    def __init__(self, value_list: list[float], prob_weight_list: list[float]):
+        super().__init__(min_value=min(value_list), max_value=max(value_list))
+        self.value_list = value_list
+        self.prob_weight_list = prob_weight_list
+
+        self.prob_list = [weight / sum(prob_weight_list) for weight in prob_weight_list]
+        self.dist = scipy.stats.rv_discrete(
+            name="custom_discrete", values=(self.value_list, self.prob_list)
+        )
+
+    def __repr__(self):
+        return (
+            "CustomDiscrete( \n"
+            f"\t value_list= {self.value_list} \n"
+            f"\t prob_weight_list= {self.prob_weight_list} \n"
+            ")"
+        )
+
+    def sample(self) -> float:
+        return self.dist.rvs()
 
 
 class BoundedZipf(RandomVariable):
