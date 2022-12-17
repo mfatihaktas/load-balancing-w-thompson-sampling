@@ -1,4 +1,5 @@
 import dataclasses
+import joblib
 import numpy
 import simpy
 
@@ -35,8 +36,8 @@ class SimResult:
         )
 
     def __post_init__(self):
-        self.ET = numpy.mean(sink.task_response_time_list)
-        self.std_T = numpy.std(sink.task_response_time_list)
+        self.ET = numpy.mean(self.t_l)
+        self.std_T = numpy.std(self.t_l)
 
 
 def combine_sim_results(sim_result_list: list[SimResult]) -> SimResult:
@@ -56,6 +57,13 @@ def sim(
     sching_agent_given_server_list: Callable[[list[server_module.Server]], agent_module.SchingAgent],
     sim_result_list: list[SimResult],
 ):
+    log(DEBUG, "Started",
+        num_servers=num_servers,
+        inter_task_gen_time_rv=inter_task_gen_time_rv,
+        task_service_time_rv=task_service_time_rv,
+        num_tasks_to_recv=num_tasks_to_recv,
+    )
+
     sink = sink_module.Sink(env=env, _id="sink")
 
     server_list = [
@@ -85,7 +93,7 @@ def sim(
     env.run(until=sink.recv_tasks_proc)
 
     sim_result = SimResult(t_l=sink.task_response_time_list)
-    log(INFO, "", sim_result=sim_result)
+    log(INFO, "Done", sim_result=sim_result)
 
     sim_result_list.append(sim_result)
 
@@ -109,7 +117,7 @@ def sim_w_joblib(
     )
 
     sim_result_list = []
-    joblib.Parallel(n_jobs=-1)(
+    joblib.Parallel(n_jobs=-1, prefer="threads")(
         joblib.delayed(sim)(
             env=env,
             num_servers=num_servers,
@@ -122,4 +130,6 @@ def sim_w_joblib(
         for i in range(num_sim_runs)
     )
 
-    return combine_sim_results(sim_result_list=sim_result_list)
+    sim_result = combine_sim_results(sim_result_list=sim_result_list)
+    log(INFO, "Done", sim_result=sim_result)
+    return sim_result
