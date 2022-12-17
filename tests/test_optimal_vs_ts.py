@@ -19,7 +19,7 @@ def test_optimal_vs_ts(
     task_service_time_rv: random_variable.RandomVariable,
 ):
     # Sim config variables
-    num_tasks_to_recv = 10 # 1000
+    num_tasks_to_recv = 500 # 1000
     win_len = 100
     num_sim_runs = 3
 
@@ -55,7 +55,7 @@ def test_optimal_vs_ts(
         inter_task_gen_time_rv = random_variable.Exponential(mu=arrival_rate)
 
         def sim_result(sching_agent_given_server_list):
-            return sim_module.sim(
+            return sim_module.sim_w_joblib(
                 env=env,
                 num_servers=num_servers,
                 inter_task_gen_time_rv=inter_task_gen_time_rv,
@@ -85,8 +85,8 @@ def test_optimal_vs_ts(
     std_T_ts_sliding_win_list, std_T_ts_sliding_win_for_each_node_list = [], []
     ET_to_least_work_left_list, ET_to_noisy_least_work_left_list, ET_to_fewest_tasks_left_list = [], [], []
     std_T_to_least_work_left_list, std_T_to_noisy_least_work_left_list, std_T_to_fewest_tasks_left_list = [], [], []
-    # for arrival_rate in numpy.linspace(0.1, num_servers, num=4, endpoint=False):
-    for arrival_rate in [0.1]:
+    for arrival_rate in numpy.linspace(0.1, num_servers, num=4, endpoint=False):
+    # for arrival_rate in [0.1]:
         log(INFO, f">> arrival_rate= {arrival_rate}")
         arrival_rate_list.append(arrival_rate)
 
