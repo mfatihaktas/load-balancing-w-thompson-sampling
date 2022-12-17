@@ -19,13 +19,78 @@ from src.prob import random_variable
 from src.utils.debug import *
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(repr=False)
 class SimResult:
-    ET: float
-    std_T: float
+    t_l: list[float]
+
+    ET: float = None
+    std_T: float = None
+
+    def __repr__(self):
+        return (
+            "SimResult( \n"
+            f"\t {self.ET} \n"
+            f"\t {self.std_T} \n"
+            ")"
+        )
+
+    def __post_init__(self):
+        self.ET = numpy.mean(sink.task_response_time_list)
+        self.std_T = numpy.std(sink.task_response_time_list)
+
+
+def combine_sim_results(sim_result_list: list[SimResult]) -> SimResult:
+    t_l = []
+    for sim_result in sim_result_list:
+        t_l.extend(sim_result.t_l)
+
+    return SimResult(t_l=t_l)
 
 
 def sim(
+    env: simpy.Environment,
+    num_servers: int,
+    inter_task_gen_time_rv: random_variable.RandomVariable,
+    task_service_time_rv: random_variable.RandomVariable,
+    num_tasks_to_recv: int,
+    sching_agent_given_server_list: Callable[[list[server_module.Server]], agent_module.SchingAgent],
+    sim_result_list: list[SimResult],
+):
+    sink = sink_module.Sink(env=env, _id="sink")
+
+    server_list = [
+        server_module.Server(env=env, _id=f"s{i}", sink=sink) for i in range(num_servers)
+    ]
+
+    sching_agent = sching_agent_given_server_list(server_list=server_list)
+
+    scher = scheduler_module.Scheduler(
+        env=env,
+        _id="scher",
+        node_list=server_list,
+        sching_agent=sching_agent,
+    )
+
+    source = source_module.Source(
+        env=env,
+        _id="source",
+        inter_task_gen_time_rv=inter_task_gen_time_rv,
+        task_service_time_rv=task_service_time_rv,
+        next_hop=scher,
+    )
+
+    sink.sching_agent = sching_agent
+    sink.num_tasks_to_recv = num_tasks_to_recv
+
+    env.run(until=sink.recv_tasks_proc)
+
+    sim_result = SimResult(t_l=sink.task_response_time_list)
+    log(INFO, "", sim_result=sim_result)
+
+    sim_result_list.append(sim_result)
+
+
+def sim_w_joblib(
     env: simpy.Environment,
     num_servers: int,
     inter_task_gen_time_rv: random_variable.RandomVariable,
@@ -43,48 +108,18 @@ def sim(
         num_sim_runs=num_sim_runs,
     )
 
-    def sim_run_once() -> list[float]:
-        sink = sink_module.Sink(env=env, _id="sink")
-
-        server_list = [
-            server_module.Server(env=env, _id=f"s{i}", sink=sink) for i in range(num_servers)
-        ]
-
-        sching_agent = sching_agent_given_server_list(server_list=server_list)
-
-        scher = scheduler_module.Scheduler(
+    sim_result_list = []
+    joblib.Parallel(n_jobs=-1)(
+        joblib.delayed(sim)(
             env=env,
-            _id="scher",
-            node_list=server_list,
-            sching_agent=sching_agent,
-        )
-
-        source = source_module.Source(
-            env=env,
-            _id="source",
+            num_servers=num_servers,
             inter_task_gen_time_rv=inter_task_gen_time_rv,
             task_service_time_rv=task_service_time_rv,
-            next_hop=scher,
+            num_tasks_to_recv=num_tasks_to_recv,
+            sching_agent_given_server_list=sching_agent_given_server_list,
+            sim_result_list=sim_result_list,
         )
+        for i in range(num_sim_runs)
+    )
 
-        sink.sching_agent = sching_agent
-        sink.num_tasks_to_recv = num_tasks_to_recv
-
-        env.run(until=sink.recv_tasks_proc)
-
-        return sink.task_response_time_list
-
-    task_response_time_list = []
-    for i in range(num_sim_runs):
-        log(INFO, f">> sim-{i}")
-
-        task_response_time_list_ = sim_run_once()
-        ET = numpy.mean(task_response_time_list_)
-        std_T = numpy.std(task_response_time_list_)
-        log(INFO, "", ET=ET, std_T=std_T)
-
-        task_response_time_list.extend(task_response_time_list_)
-
-    ET = numpy.mean(task_response_time_list)
-    std_T = numpy.std(task_response_time_list)
-    return SimResult(ET=ET, std_T=std_T)
+    return combine_sim_results(sim_result_list=sim_result_list)
