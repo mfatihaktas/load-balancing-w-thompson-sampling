@@ -30,8 +30,8 @@ class SimResult:
     def __repr__(self):
         return (
             "SimResult( \n"
-            f"\t {self.ET} \n"
-            f"\t {self.std_T} \n"
+            f"\t ET= {self.ET} \n"
+            f"\t std_T= {self.std_T} \n"
             ")"
         )
 

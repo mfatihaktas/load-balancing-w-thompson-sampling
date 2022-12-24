@@ -3,6 +3,7 @@ import simpy
 
 from src.agent import (
     optimal as optimal_module,
+    random as random_module,
     ts as ts_module,
 )
 from src.prob import random_variable
@@ -19,11 +20,14 @@ def test_optimal_vs_ts(
     task_service_time_rv: random_variable.RandomVariable,
 ):
     # Sim config variables
-    num_tasks_to_recv = 1 # 500 # 1000
+    num_tasks_to_recv = 1000
     win_len = 100
     num_sim_runs = 3
 
     # Callbacks that return the sching agents
+    def assign_w_random(server_list: list[server_module.Server]):
+        return random_module.AssignToRandom(node_list=server_list)
+
     def assign_w_ts_sliding_win(server_list: list[server_module.Server]):
         return ts_module.AssignWithThompsonSampling_slidingWin(
             node_id_list=[s._id for s in server_list],
@@ -74,6 +78,7 @@ def test_optimal_vs_ts(
                 num_sim_runs=num_sim_runs,
             )
 
+        sim_result_for_assign_to_random = sim_result(sching_agent_given_server_list=assign_w_random)
         sim_result_for_ts_sliding_win = None # sim_result(sching_agent_given_server_list=assign_w_ts_sliding_win)
         sim_result_for_ts_sliding_win_for_each_node = sim_result(sching_agent_given_server_list=assign_w_ts_sliding_win_for_each_node)
         sim_result_for_assign_to_least_work_left = None # sim_result(sching_agent_given_server_list=assign_to_least_work_left)
@@ -82,6 +87,7 @@ def test_optimal_vs_ts(
         sim_result_for_assign_to_fewest_tasks_left = sim_result(sching_agent_given_server_list=assign_to_fewest_tasks_left)
 
         return (
+            sim_result_for_assign_to_random,
             sim_result_for_ts_sliding_win,
             sim_result_for_ts_sliding_win_for_each_node,
             sim_result_for_assign_to_least_work_left,
@@ -92,8 +98,8 @@ def test_optimal_vs_ts(
 
     # Run the sim
     arrival_rate_list = []
-    ET_ts_sliding_win_list, ET_ts_sliding_win_for_each_node_list = [], []
-    std_T_ts_sliding_win_list, std_T_ts_sliding_win_for_each_node_list = [], []
+    ET_random_list, ET_ts_sliding_win_list, ET_ts_sliding_win_for_each_node_list = [], [], []
+    std_T_random_list, std_T_ts_sliding_win_list, std_T_ts_sliding_win_for_each_node_list = [], [], []
     ET_to_least_work_left_list, ET_to_noisy_least_work_left_list, ET_to_very_noisy_least_work_left_list, ET_to_fewest_tasks_left_list = [], [], [], []
     std_T_to_least_work_left_list, std_T_to_noisy_least_work_left_list, std_T_to_very_noisy_least_work_left_list, std_T_to_fewest_tasks_left_list = [], [], [], []
     for arrival_rate in numpy.linspace(0.1, num_servers, num=4, endpoint=False):
@@ -102,6 +108,7 @@ def test_optimal_vs_ts(
         arrival_rate_list.append(arrival_rate)
 
         (
+            sim_result_for_assign_to_random,
             sim_result_for_ts_sliding_win,
             sim_result_for_ts_sliding_win_for_each_node,
             sim_result_for_assign_to_least_work_left,
@@ -110,6 +117,7 @@ def test_optimal_vs_ts(
             sim_result_for_assign_to_fewest_tasks_left
         ) = sim_(arrival_rate=arrival_rate)
         log(INFO, "",
+            sim_result_for_assign_to_random=sim_result_for_assign_to_random,
             sim_result_for_ts_sliding_win=sim_result_for_ts_sliding_win,
             sim_result_for_ts_sliding_win_for_each_node=sim_result_for_ts_sliding_win_for_each_node,
             sim_result_for_assign_to_least_work_left=sim_result_for_assign_to_least_work_left,
@@ -117,6 +125,10 @@ def test_optimal_vs_ts(
             sim_result_for_assign_to_very_noisy_least_work_left=sim_result_for_assign_to_very_noisy_least_work_left,
             sim_result_for_assign_to_fewest_tasks_left=sim_result_for_assign_to_fewest_tasks_left,
         )
+
+        if sim_result_for_assign_to_random:
+            ET_random_list.append(sim_result_for_assign_to_random.ET)
+            std_T_random_list.append(sim_result_for_assign_to_random.std_T)
 
         if sim_result_for_ts_sliding_win:
             ET_ts_sliding_win_list.append(sim_result_for_ts_sliding_win.ET)
@@ -142,6 +154,7 @@ def test_optimal_vs_ts(
             ET_to_fewest_tasks_left_list.append(sim_result_for_assign_to_fewest_tasks_left.ET)
             std_T_to_fewest_tasks_left_list.append(sim_result_for_assign_to_fewest_tasks_left.std_T)
 
+    plot.errorbar(arrival_rate_list, ET_random_list, yerr=std_T_random_list, color=next(dark_color_cycle), label="Random", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
     # plot.errorbar(arrival_rate_list, ET_ts_sliding_win_list, yerr=std_T_ts_sliding_win_list, color=next(dark_color_cycle), label="TS-SlidingWin", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
     plot.errorbar(arrival_rate_list, ET_ts_sliding_win_for_each_node_list, yerr=std_T_ts_sliding_win_for_each_node_list, color=next(dark_color_cycle), label="TS-SlidingWinForEachNode", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
     # plot.errorbar(arrival_rate_list, ET_to_least_work_left_list, yerr=std_T_to_least_work_left_list, color=next(dark_color_cycle), label="AssignToLeastWorkLeft", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
