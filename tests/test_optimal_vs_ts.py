@@ -14,15 +14,19 @@ from src.utils.debug import *
 from src.utils.plot import *
 
 
-def test_optimal_vs_ts(
+def optimal_vs_ts(
     env: simpy.Environment,
     num_servers: int,
     task_service_time_rv: random_variable.RandomVariable,
+    num_tasks_to_recv: int = 1000,
+    win_len: int = 100,
+    num_sim_runs: int = 3,
 ):
-    # Sim config variables
-    num_tasks_to_recv = 1000
-    win_len = 100
-    num_sim_runs = 3
+    log(INFO, "Started",
+        num_servers=num_servers,
+        num_tasks_to_recv=num_tasks_to_recv,
+        num_sim_runs=num_sim_runs,
+    )
 
     # Callbacks that return the sching agents
     def assign_w_random(server_list: list[server_module.Server]):
@@ -179,3 +183,27 @@ def test_optimal_vs_ts(
     plot.gcf().clear()
 
     log(INFO, "Done")
+
+
+def test_optimal_vs_ts(
+    env: simpy.Environment,
+    num_servers: int,
+    task_service_time_rv: random_variable.RandomVariable,
+):
+    optimal_vs_ts(
+        env=env,
+        num_servers=num_servers,
+        task_service_time_rv=task_service_time_rv,
+        num_tasks_to_recv=1000,
+        num_sim_runs=3,
+    )
+
+
+if __name__ == "__main__":
+    optimal_vs_ts(
+        env=simpy.Environment(),
+        num_servers=2,
+        task_service_time_rv=random_variable.DiscreteUniform(min_value=1, max_value=1),
+        num_tasks_to_recv=10,
+        num_sim_runs=1,
+    )
