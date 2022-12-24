@@ -1,5 +1,6 @@
 .direnv/
 .DS_Store
+*.dump
 
 *.jpeg
 *.pdf
