@@ -1,5 +1,8 @@
 PYTEST=pytest --color=yes --verbose --showlocals
 
+clean:
+	rm -fr .direnv
+
 env:
 	direnv allow
 
