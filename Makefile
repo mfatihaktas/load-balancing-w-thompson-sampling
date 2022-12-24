@@ -1,5 +1,8 @@
 PYTEST=pytest --color=yes --verbose --showlocals
 
+env:
+	direnv allow
+
 install:
 	pyenv install; \
 	direnv allow; \
