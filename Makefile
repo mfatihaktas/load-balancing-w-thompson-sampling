@@ -19,6 +19,9 @@ profile:
 	# python tests/test_optimal_vs_ts.py
 	python -m cProfile -o ${PROFILE_FILE} tests/test_optimal_vs_ts.py
 
+run:
+	python tests/test_optimal_vs_ts.py
+
 viz:
 	snakeviz ${PROFILE_FILE}
 
