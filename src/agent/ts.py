@@ -126,10 +126,10 @@ class AssignWithThompsonSampling_resetWinOnRareEvent(AssignWithThompsonSampling_
             record()
 
         else:
-            mean, stdev = mean_stdev_cost(node_id)
+            mean, stdev = self.mean_stdev_cost(node_id)
             cost_rv = random_variable.TruncatedNormal(mu=mean, sigma=stdev)
 
-            Pr_getting_larger_than_cost = cost_rv.tail(cost)
+            Pr_getting_larger_than_cost = cost_rv.tail_prob(cost)
             Pr_getting_smaller_than_cost = cost_rv.cdf(cost)
             Pr_cost_is_rare = 1 - min(Pr_getting_larger_than_cost, Pr_getting_smaller_than_cost)
             if Pr_cost_is_rare >= self.threshold_prob_rare:
