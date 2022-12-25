@@ -1,6 +1,8 @@
 import collections
 import numpy
 
+from typing import Tuple
+
 from src.agent import agent
 from src.prob import random_variable
 from src.utils.debug import *
@@ -70,6 +72,16 @@ class AssignWithThompsonSampling_slidingWinForEachNode(agent.SchingAgent_wOnline
             ")"
         )
 
+    def mean_stdev_cost(self, node_id: str) -> Tuple[float, float]:
+        cost_queue = self.node_id_to_cost_queue_map[node_id]
+        mean = numpy.mean(cost_queue) if len(cost_queue) else 0
+        stdev = numpy.std(cost_queue) if len(cost_queue) else 1
+        check(stdev >= 0, "Stdev cannot be negative")
+        if stdev == 0:
+            stdev = 1
+
+        return mean, stdev
+
     def record_cost(self, node_id: str, cost: float):
         self.node_id_to_cost_queue_map[node_id].append(cost)
         log(DEBUG, "recorded", node_id=node_id, cost=cost)
@@ -79,12 +91,8 @@ class AssignWithThompsonSampling_slidingWinForEachNode(agent.SchingAgent_wOnline
 
         # Choose the node with min cost sample
         node_id_w_min_sample, min_sample = None, float("Inf")
-        for node_id, cost_queue in self.node_id_to_cost_queue_map.items():
-            mean = numpy.mean(cost_queue) if len(cost_queue) else 0
-            stdev = numpy.std(cost_queue) if len(cost_queue) else 1
-            check(stdev >= 0, "Stdev cannot be negative")
-            if stdev == 0:
-                stdev = 1
+        for node_id in self.node_id_to_cost_queue_map:
+            mean, stdev = self.mean_stdev_cost(node_id)
 
             s = random_variable.TruncatedNormal(mu=mean, sigma=stdev).sample()
             if s < min_sample:
@@ -93,3 +101,39 @@ class AssignWithThompsonSampling_slidingWinForEachNode(agent.SchingAgent_wOnline
                 # log(DEBUG, "s < min_sample", s=s, min_sample=min_sample, node_id_w_min_sample=node_id_w_min_sample)
 
         return node_id_w_min_sample
+
+
+class AssignWithThompsonSampling_resetWinOnRareEvent(AssignWithThompsonSampling_slidingWinForEachNode):
+    def __init__(self, node_id_list: list[str], win_len: int, threshold_prob_rare: float):
+        super().__init__(node_id_list=node_id_list, win_len=win_len)
+        self.threshold_prob_rare = threshold_prob_rare
+
+    def __repr__(self):
+        return (
+            "AssignWithThompsonSampling_ResetWinOnRareEvent( \n"
+            f"\t node_id_list= {self.node_id_list} \n"
+            f"\t win_len= {self.win_len} \n"
+            f"\t threshold_prob_rare= {self.threshold_prob_rare} \n"
+            ")"
+        )
+
+    def record_cost(self, node_id: str, cost: float):
+        def record():
+            self.node_id_to_cost_queue_map[node_id].append(cost)
+            log(DEBUG, "recorded", node_id=node_id, cost=cost)
+
+        if len(self.node_id_to_cost_queue_map[node_id]) < 5:
+            record()
+
+        else:
+            mean, stdev = mean_stdev_cost(node_id)
+            cost_rv = random_variable.TruncatedNormal(mu=mean, sigma=stdev)
+
+            Pr_getting_larger_than_cost = cost_rv.tail(cost)
+            Pr_getting_smaller_than_cost = cost_rv.cdf(cost)
+            Pr_cost_is_rare = 1 - min(Pr_getting_larger_than_cost, Pr_getting_smaller_than_cost)
+            if Pr_cost_is_rare >= self.threshold_prob_rare:
+                log(DEBUG, "Rare event detected", cost=cost, mean=mean, stdev=stdev, Pr_cost_is_rare=Pr_cost_is_rare, threshold_prob_rare=self.threshold_prob_rare)
+                self.node_id_to_cost_queue_map[node_id].clear()
+            else:
+                record()
