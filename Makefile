@@ -6,19 +6,18 @@ clean:
 	rm -fr .direnv
 
 env:
+	pyenv install; \
 	direnv allow
 
 install:
-	pyenv install; \
-	direnv allow; \
 	pip install --upgrade pip; \
 	pip install poetry; \
 	poetry install; \
 	pip install -e .
 
 profile:
-	python tests/test_optimal_vs_ts.py
-	# python -m cProfile -o ${PROFILE_FILE} tests/test_optimal_vs_ts.py
+	# python tests/test_optimal_vs_ts.py
+	python -m cProfile -o ${PROFILE_FILE} tests/test_optimal_vs_ts.py
 
 viz:
 	snakeviz ${PROFILE_FILE}
