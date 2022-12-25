@@ -118,7 +118,7 @@ def optimal_vs_ts(
     ET_to_least_work_left_list, ET_to_noisy_least_work_left_list, ET_to_very_noisy_least_work_left_list, ET_to_fewest_tasks_left_list = [], [], [], []
     std_T_to_least_work_left_list, std_T_to_noisy_least_work_left_list, std_T_to_very_noisy_least_work_left_list, std_T_to_fewest_tasks_left_list = [], [], [], []
     # for arrival_rate in numpy.linspace(0.1, num_servers, num=4, endpoint=False):
-    for arrival_rate in [0.1*num_servers, 0.8*num_servers]:
+    for arrival_rate in [0.1*num_servers, 0.5*num_servers, 0.8*num_servers]:
         log(INFO, f">> arrival_rate= {arrival_rate}")
         arrival_rate_list.append(arrival_rate)
 
@@ -175,6 +175,7 @@ def optimal_vs_ts(
             ET_to_fewest_tasks_left_list.append(sim_result_for_assign_to_fewest_tasks_left.ET)
             std_T_to_fewest_tasks_left_list.append(sim_result_for_assign_to_fewest_tasks_left.std_T)
 
+    '''
     plot.errorbar(arrival_rate_list, ET_random_list, yerr=std_T_random_list, color=next(dark_color_cycle), label="Random", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
     # plot.errorbar(arrival_rate_list, ET_ts_sliding_win_list, yerr=std_T_ts_sliding_win_list, color=next(dark_color_cycle), label="TS-SlidingWin", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
     # plot.errorbar(arrival_rate_list, ET_ts_sliding_win_for_each_node_list, yerr=std_T_ts_sliding_win_for_each_node_list, color=next(dark_color_cycle), label="TS-SlidingWinForEachNode", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
@@ -183,22 +184,58 @@ def optimal_vs_ts(
     plot.errorbar(arrival_rate_list, ET_to_noisy_least_work_left_list, yerr=std_T_to_noisy_least_work_left_list, color=next(dark_color_cycle), label="AssignToNoisyLeastWorkLeft", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
     plot.errorbar(arrival_rate_list, ET_to_very_noisy_least_work_left_list, yerr=std_T_to_very_noisy_least_work_left_list, color=next(dark_color_cycle), label="AssignToVeryNoisyLeastWorkLeft", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
     plot.errorbar(arrival_rate_list, ET_to_fewest_tasks_left_list, yerr=std_T_to_fewest_tasks_left_list, color=next(dark_color_cycle), label="AssignToFewestTasksLeft", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+    '''
 
-    # Save the plot
+    fig, axs = plot.subplots(1, 2)
     fontsize = 14
+
+    # E[T] vs lambda
+    ax = axs[0]
+    plot.sca(ax)
+
+    plot.plot(arrival_rate_list, ET_random_list, color=next(dark_color_cycle), label="Random", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+    # plot.plot(arrival_rate_list, ET_ts_sliding_win_list, color=next(dark_color_cycle), label="TS-SlidingWin", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+    # plot.plot(arrival_rate_list, ET_ts_sliding_win_for_each_node_list, color=next(dark_color_cycle), label="TS-SlidingWinForEachNode", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+    plot.plot(arrival_rate_list, ET_ts_reset_win_on_rare_event_list, color=next(dark_color_cycle), label="TS-ResetWinOnRareEvent", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+    # plot.plot(arrival_rate_list, ET_to_least_work_left_list, color=next(dark_color_cycle), label="AssignToLeastWorkLeft", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+    plot.plot(arrival_rate_list, ET_to_noisy_least_work_left_list, color=next(dark_color_cycle), label="AssignToNoisyLeastWorkLeft", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+    plot.plot(arrival_rate_list, ET_to_very_noisy_least_work_left_list, color=next(dark_color_cycle), label="AssignToVeryNoisyLeastWorkLeft", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+    plot.plot(arrival_rate_list, ET_to_fewest_tasks_left_list, color=next(dark_color_cycle), label="AssignToFewestTasksLeft", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+
     plot.legend(fontsize=fontsize)
     plot.ylabel(r"$E[T]$", fontsize=fontsize)
     plot.yscale("log")
     plot.xlabel(r"$\lambda$", fontsize=fontsize)
-    plot.title(
+
+    # Stdev[T] vs lambda
+    ax = axs[1]
+    plot.sca(ax)
+
+    plot.plot(arrival_rate_list, std_T_random_list, color=next(dark_color_cycle), label="Random", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+    # plot.plot(arrival_rate_list, std_T_ts_sliding_win_list, color=next(dark_color_cycle), label="TS-SlidingWin", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+    # plot.plot(arrival_rate_list, std_T_ts_sliding_win_for_each_node_list, color=next(dark_color_cycle), label="TS-SlidingWinForEachNode", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+    plot.plot(arrival_rate_list, std_T_ts_reset_win_on_rare_event_list, color=next(dark_color_cycle), label="TS-ResetWinOnRareEvent", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+    # plot.plot(arrival_rate_list, std_T_to_least_work_left_list, color=next(dark_color_cycle), label="AssignToLeastWorkLeft", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+    plot.plot(arrival_rate_list, std_T_to_noisy_least_work_left_list, color=next(dark_color_cycle), label="AssignToNoisyLeastWorkLeft", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+    plot.plot(arrival_rate_list, std_T_to_very_noisy_least_work_left_list, color=next(dark_color_cycle), label="AssignToVeryNoisyLeastWorkLeft", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+    plot.plot(arrival_rate_list, std_T_to_fewest_tasks_left_list, color=next(dark_color_cycle), label="AssignToFewestTasksLeft", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+
+    plot.legend(fontsize=fontsize)
+    plot.ylabel(r"$\sigma[T]$", fontsize=fontsize)
+    plot.yscale("log")
+    plot.xlabel(r"$\lambda$", fontsize=fontsize)
+
+    # Save the plot
+    plot.subplots_adjust(wspace=0.2)
+    suptitle = plot.suptitle(
         r"$N_{\textrm{server}}= $" + f"{num_servers}, "
         r"$X \sim \textrm{Exp}(\lambda)$, "
         fr"$S \sim {task_service_time_rv.to_latex()}$, "
         r"$N_{\textrm{tasks}}= " + f"{num_tasks_to_recv}$, "
         r"$N_{\textrm{sim}}= " + f"{num_sim_runs}$"
     )
-    plot.gcf().set_size_inches(6, 4)
-    plot.savefig("plot_optimal_vs_ts_ET_vs_lambda.png", bbox_inches="tight")
+    plot.gcf().set_size_inches(15, 6)
+    plot.savefig("plot_optimal_vs_ts_ET_vs_lambda.png", bbox_extra_artists=(suptitle,), bbox_inches="tight")
     plot.gcf().clear()
 
     log(INFO, "Done")
@@ -223,6 +260,6 @@ if __name__ == "__main__":
         env=simpy.Environment(),
         num_servers=2,
         task_service_time_rv=random_variable.DiscreteUniform(min_value=1, max_value=1),
-        num_tasks_to_recv=1, # 10000,
+        num_tasks_to_recv=10000,
         num_sim_runs=1,
     )
