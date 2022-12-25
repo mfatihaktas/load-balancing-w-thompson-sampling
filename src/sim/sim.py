@@ -117,8 +117,8 @@ def sim_w_joblib(
     )
 
     sim_result_list = []
-    joblib.Parallel(n_jobs=-1, prefer="threads")(
-        joblib.delayed(sim)(
+    if num_sim_runs == 1:
+        sim(
             env=env,
             num_servers=num_servers,
             inter_task_gen_time_rv=inter_task_gen_time_rv,
@@ -127,8 +127,20 @@ def sim_w_joblib(
             sching_agent_given_server_list=sching_agent_given_server_list,
             sim_result_list=sim_result_list,
         )
-        for i in range(num_sim_runs)
-    )
+
+    else:
+        joblib.Parallel(n_jobs=-1, prefer="threads")(
+            joblib.delayed(sim)(
+                env=env,
+                num_servers=num_servers,
+                inter_task_gen_time_rv=inter_task_gen_time_rv,
+                task_service_time_rv=task_service_time_rv,
+                num_tasks_to_recv=num_tasks_to_recv,
+                sching_agent_given_server_list=sching_agent_given_server_list,
+                sim_result_list=sim_result_list,
+            )
+            for i in range(num_sim_runs)
+        )
 
     sim_result = combine_sim_results(sim_result_list=sim_result_list)
     log(INFO, "Done", sim_result=sim_result)
