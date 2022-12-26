@@ -94,8 +94,8 @@ def optimal_vs_ts(
         sim_result_for_ts_sliding_win_for_each_node = None # sim_result(sching_agent_given_server_list=assign_w_ts_sliding_win_for_each_node)
         sim_result_for_ts_reset_win_on_rare_event = sim_result(sching_agent_given_server_list=assign_w_ts_reset_win_on_rare_event)
         sim_result_for_assign_to_least_work_left = None # sim_result(sching_agent_given_server_list=assign_to_least_work_left)
-        sim_result_for_assign_to_noisy_least_work_left = sim_result(sching_agent_given_server_list=assign_to_noisy_least_work_left)
-        sim_result_for_assign_to_very_noisy_least_work_left = sim_result(sching_agent_given_server_list=assign_to_very_noisy_least_work_left)
+        sim_result_for_assign_to_noisy_least_work_left = None # sim_result(sching_agent_given_server_list=assign_to_noisy_least_work_left)
+        sim_result_for_assign_to_very_noisy_least_work_left = None # sim_result(sching_agent_given_server_list=assign_to_very_noisy_least_work_left)
         sim_result_for_assign_to_fewest_tasks_left = sim_result(sching_agent_given_server_list=assign_to_fewest_tasks_left)
 
         return (
@@ -110,17 +110,16 @@ def optimal_vs_ts(
         )
 
     # Run the sim
-    arrival_rate_list = []
+    # arrival_rate_list = list(numpy.linspace(0.1, num_servers, num=4, endpoint=False))
+    arrival_rate_list = [0.1*num_servers, 0.5*num_servers, 0.8*num_servers]
     ET_random_list, std_T_random_list = [], []
     ET_ts_sliding_win_list, std_T_ts_sliding_win_list = [], []
     ET_ts_sliding_win_for_each_node_list, std_T_ts_sliding_win_for_each_node_list = [], []
     ET_ts_reset_win_on_rare_event_list, std_T_ts_reset_win_on_rare_event_list = [], []
     ET_to_least_work_left_list, ET_to_noisy_least_work_left_list, ET_to_very_noisy_least_work_left_list, ET_to_fewest_tasks_left_list = [], [], [], []
     std_T_to_least_work_left_list, std_T_to_noisy_least_work_left_list, std_T_to_very_noisy_least_work_left_list, std_T_to_fewest_tasks_left_list = [], [], [], []
-    # for arrival_rate in numpy.linspace(0.1, num_servers, num=4, endpoint=False):
-    for arrival_rate in [0.1*num_servers, 0.5*num_servers, 0.8*num_servers]:
+    for arrival_rate in arrival_rate_list:
         log(INFO, f">> arrival_rate= {arrival_rate}")
-        arrival_rate_list.append(arrival_rate)
 
         (
             sim_result_for_assign_to_random,
@@ -216,8 +215,8 @@ def optimal_vs_ts(
     # plot.plot(arrival_rate_list, std_T_ts_sliding_win_for_each_node_list, color=next(dark_color_cycle), label="TS-SlidingWinForEachNode", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
     plot.plot(arrival_rate_list, std_T_ts_reset_win_on_rare_event_list, color=next(dark_color_cycle), label="TS-ResetWinOnRareEvent", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
     # plot.plot(arrival_rate_list, std_T_to_least_work_left_list, color=next(dark_color_cycle), label="AssignToLeastWorkLeft", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-    plot.plot(arrival_rate_list, std_T_to_noisy_least_work_left_list, color=next(dark_color_cycle), label="AssignToNoisyLeastWorkLeft", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-    plot.plot(arrival_rate_list, std_T_to_very_noisy_least_work_left_list, color=next(dark_color_cycle), label="AssignToVeryNoisyLeastWorkLeft", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+    # plot.plot(arrival_rate_list, std_T_to_noisy_least_work_left_list, color=next(dark_color_cycle), label="AssignToNoisyLeastWorkLeft", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+    # plot.plot(arrival_rate_list, std_T_to_very_noisy_least_work_left_list, color=next(dark_color_cycle), label="AssignToVeryNoisyLeastWorkLeft", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
     plot.plot(arrival_rate_list, std_T_to_fewest_tasks_left_list, color=next(dark_color_cycle), label="AssignToFewestTasksLeft", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
     plot.legend(fontsize=fontsize)
@@ -260,6 +259,6 @@ if __name__ == "__main__":
         env=simpy.Environment(),
         num_servers=2,
         task_service_time_rv=random_variable.DiscreteUniform(min_value=1, max_value=1),
-        num_tasks_to_recv=10000,
+        num_tasks_to_recv=1000, # 10000,
         num_sim_runs=1,
     )
