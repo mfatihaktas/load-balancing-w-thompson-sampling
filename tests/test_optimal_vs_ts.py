@@ -197,8 +197,8 @@ def optimal_vs_ts(
     # plot.plot(arrival_rate_list, ET_ts_sliding_win_for_each_node_list, color=next(dark_color_cycle), label="TS-SlidingWinForEachNode", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
     plot.plot(arrival_rate_list, ET_ts_reset_win_on_rare_event_list, color=next(dark_color_cycle), label="TS-ResetWinOnRareEvent", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
     # plot.plot(arrival_rate_list, ET_to_least_work_left_list, color=next(dark_color_cycle), label="AssignToLeastWorkLeft", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-    plot.plot(arrival_rate_list, ET_to_noisy_least_work_left_list, color=next(dark_color_cycle), label="AssignToNoisyLeastWorkLeft", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-    plot.plot(arrival_rate_list, ET_to_very_noisy_least_work_left_list, color=next(dark_color_cycle), label="AssignToVeryNoisyLeastWorkLeft", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+    # plot.plot(arrival_rate_list, ET_to_noisy_least_work_left_list, color=next(dark_color_cycle), label="AssignToNoisyLeastWorkLeft", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+    # plot.plot(arrival_rate_list, ET_to_very_noisy_least_work_left_list, color=next(dark_color_cycle), label="AssignToVeryNoisyLeastWorkLeft", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
     plot.plot(arrival_rate_list, ET_to_fewest_tasks_left_list, color=next(dark_color_cycle), label="AssignToFewestTasksLeft", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
     plot.legend(fontsize=fontsize)

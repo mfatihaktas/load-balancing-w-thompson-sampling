@@ -68,7 +68,7 @@ exclude = [
 [tool.pytest.ini_options]
 minversion = "6.1"
 log_cli = true
-log_cli_level = "INFO" # "DEBUG"
+log_cli_level = "DEBUG"
 log_cli_format = "%(levelname)s] %(file_name)s:%(line_number)s - %(func_name)s: %(message)s"
 log_cli_date_format = "%Y-%m-%d %H:%M:%S"
 testpaths = [

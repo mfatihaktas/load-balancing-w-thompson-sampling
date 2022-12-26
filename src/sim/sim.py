@@ -55,7 +55,7 @@ def sim(
     task_service_time_rv: random_variable.RandomVariable,
     num_tasks_to_recv: int,
     sching_agent_given_server_list: Callable[[list[server_module.Server]], agent_module.SchingAgent],
-    sim_result_list: list[SimResult],
+    sim_result_list: list[SimResult] = None,
 ):
     log(DEBUG, "Started",
         num_servers=num_servers,
@@ -95,7 +95,10 @@ def sim(
     sim_result = SimResult(t_l=sink.task_response_time_list)
     log(INFO, "Done", sim_result=sim_result)
 
-    sim_result_list.append(sim_result)
+    if sim_result_list is not None:
+        sim_result_list.append(sim_result)
+
+    return sim_result
 
 
 def sim_w_joblib(

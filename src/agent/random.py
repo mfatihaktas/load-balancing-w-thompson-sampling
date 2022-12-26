@@ -17,5 +17,5 @@ class AssignToRandom(agent.SchingAgent):
             ")"
         )
 
-    def node_id_to_assign(self) -> str:
+    def node_id_to_assign(self, time_epoch: float=None) -> str:
         return random.sample(self.node_list, 1)[0]._id

@@ -11,8 +11,8 @@ class SchingAgent(abc.ABC):
         return "SchingAgent()"
 
     @abc.abstractmethod
-    def node_id_to_assign(self):
-        return None
+    def node_id_to_assign(self, time_epoch: float=None):
+        pass
 
 
 class SchingAgent_wOnlineLearning(SchingAgent):

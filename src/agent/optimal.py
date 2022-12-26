@@ -16,7 +16,7 @@ class AssignToLeastWorkLeft(agent.SchingAgent):
             ")"
         )
 
-    def node_id_to_assign(self) -> str:
+    def node_id_to_assign(self, time_epoch: float=None) -> str:
         node_w_least_work = None
         least_work = float("Inf")
         for node in self.node_list:
@@ -45,7 +45,7 @@ class AssignToNoisyLeastWorkLeft(AssignToLeastWorkLeft):
             ")"
         )
 
-    def node_id_to_assign(self) -> str:
+    def node_id_to_assign(self, time_epoch: float=None) -> str:
         node_w_least_work = None
         least_work = float("Inf")
         for node in self.node_list:
@@ -71,7 +71,7 @@ class AssignToFewestTasksLeft(agent.SchingAgent):
             ")"
         )
 
-    def node_id_to_assign(self) -> str:
+    def node_id_to_assign(self, time_epoch: float=None) -> str:
         node_w_fewest_tasks_left = None
         fewest_tasks_left = float("Inf")
         for node in self.node_list:

@@ -27,7 +27,7 @@ class AssignWithThompsonSampling_slidingWin(agent.SchingAgent_wOnlineLearning):
         self.node_id_cost_queue.append((node_id, cost))
         log(DEBUG, "recorded", node_id=node_id, cost=cost)
 
-    def node_id_to_assign(self):
+    def node_id_to_assign(self, time_epoch: float=None):
         # Construct `node_id_to_costs_map`
         node_id_to_costs_map = collections.defaultdict(list)
         for (node_id, cost) in self.node_id_cost_queue:
@@ -75,10 +75,10 @@ class AssignWithThompsonSampling_slidingWinForEachNode(agent.SchingAgent_wOnline
     def mean_stdev_cost(self, node_id: str) -> Tuple[float, float]:
         cost_queue = self.node_id_to_cost_queue_map[node_id]
         mean = numpy.mean(cost_queue) if len(cost_queue) else 0
-        stdev = numpy.std(cost_queue) if len(cost_queue) else 1
+        stdev = numpy.std(cost_queue) if len(cost_queue) else 0.01
         check(stdev >= 0, "Stdev cannot be negative")
         if stdev == 0:
-            stdev = 1
+            stdev = 0.01
 
         return mean, stdev
 
@@ -86,7 +86,7 @@ class AssignWithThompsonSampling_slidingWinForEachNode(agent.SchingAgent_wOnline
         self.node_id_to_cost_queue_map[node_id].append(cost)
         log(DEBUG, "recorded", node_id=node_id, cost=cost)
 
-    def node_id_to_assign(self):
+    def node_id_to_assign(self, time_epoch: float=None):
         log(DEBUG, "", node_id_to_cost_queue_map=self.node_id_to_cost_queue_map)
 
         # Choose the node with min cost sample
@@ -107,6 +107,8 @@ class AssignWithThompsonSampling_resetWinOnRareEvent(AssignWithThompsonSampling_
     def __init__(self, node_id_list: list[str], win_len: int, threshold_prob_rare: float):
         super().__init__(node_id_list=node_id_list, win_len=win_len)
         self.threshold_prob_rare = threshold_prob_rare
+
+        self.node_id_to_time_last_assigned_map = {node_id: 0 for node_id in node_id_list}
 
     def __repr__(self):
         return (
@@ -137,3 +139,25 @@ class AssignWithThompsonSampling_resetWinOnRareEvent(AssignWithThompsonSampling_
                 self.node_id_to_cost_queue_map[node_id].clear()
             else:
                 record()
+
+    def node_id_to_assign(self, time_epoch: float):
+        log(DEBUG, "", node_id_to_cost_queue_map=self.node_id_to_cost_queue_map)
+
+        # Choose the node with min cost sample
+        node_id_w_min_sample, min_sample = None, float("Inf")
+        for node_id in self.node_id_to_cost_queue_map:
+            mean, stdev = self.mean_stdev_cost(node_id)
+            if mean >= time_epoch - self.node_id_to_time_last_assigned_map[node_id]:
+                log(DEBUG, "Mean >= time_epoch, resetting memory buffer", node_id=node_id)
+                self.node_id_to_cost_queue_map[node_id].clear()
+                node_id_w_min_sample = node_id
+                break
+
+            s = random_variable.TruncatedNormal(mu=mean, sigma=stdev).sample()
+            if s < min_sample:
+                min_sample = s
+                node_id_w_min_sample = node_id
+                # log(DEBUG, "s < min_sample", s=s, min_sample=min_sample, node_id_w_min_sample=node_id_w_min_sample)
+
+        self.node_id_to_time_last_assigned_map[node_id_w_min_sample] = time_epoch
+        return node_id_w_min_sample

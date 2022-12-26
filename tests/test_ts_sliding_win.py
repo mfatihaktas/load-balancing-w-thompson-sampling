@@ -9,16 +9,23 @@ from src.utils.debug import *
 from src.utils.plot import *
 
 
-def test_AssignWithThompsonSampling_slidingWin(
+def test_AssignWithThompsonSampling(
     env: simpy.Environment,
     num_servers: int,
     inter_task_gen_time_rv: random_variable.RandomVariable,
     task_service_time_rv: random_variable.RandomVariable,
 ):
-    def ts_sliding_win(server_list: list[server_module.Server]):
+    def assign_w_ts_sliding_win(server_list: list[server_module.Server]):
         return ts_module.AssignWithThompsonSampling_slidingWin(
             node_id_list=[s._id for s in server_list],
             win_len=100,
+        )
+
+    def assign_w_ts_reset_win_on_rare_event(server_list: list[server_module.Server]):
+        return ts_module.AssignWithThompsonSampling_resetWinOnRareEvent(
+            node_id_list=[s._id for s in server_list],
+            win_len=100,
+            threshold_prob_rare=0.9,
         )
 
     sim_result = sim_module.sim(
@@ -27,7 +34,7 @@ def test_AssignWithThompsonSampling_slidingWin(
         inter_task_gen_time_rv=inter_task_gen_time_rv,
         task_service_time_rv=task_service_time_rv,
         num_tasks_to_recv=100,
-        sching_agent_given_server_list=ts_sliding_win,
+        sching_agent_given_server_list=assign_w_ts_reset_win_on_rare_event,
     )
     log(INFO, "", sim_result=sim_result)
 
