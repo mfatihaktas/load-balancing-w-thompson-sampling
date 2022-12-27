@@ -142,7 +142,11 @@ class AssignWithThompsonSampling_resetWinOnRareEvent(AssignWithThompsonSampling_
                 record()
 
     def node_id_to_assign(self, time_epoch: float):
-        log(DEBUG, "", node_id_to_cost_queue_map=self.node_id_to_cost_queue_map)
+        log(DEBUG, "",
+            node_id_to_cost_queue_map=self.node_id_to_cost_queue_map,
+            node_list=[node.repr_w_state() for node in self.node_list],
+            time_epoch=time_epoch,
+        )
 
         # Choose the node with min-cost sample
         node_id_w_min_sample, min_sample = None, float("Inf")

@@ -10,7 +10,7 @@ class Node:
         self._id = _id
 
     def __repr__(self):
-        return "Node( \n" f"\t id= {self._id} \n" ")"
+        return f"Node(id= {self._id})"
 
     @abc.abstractmethod
     def num_tasks_left(self):
