@@ -16,8 +16,10 @@ class SchingAgent(abc.ABC):
 
 
 class SchingAgent_wOnlineLearning(SchingAgent):
-    def __init__(self, node_id_list: list[str]):
-        self.node_id_list = node_id_list
+    def __init__(self, node_list: list[node.Node]):
+        self.node_list = node_list
+
+        self.node_id_list = [node._id for node in self.node_list]
 
     def __repr__(self):
         return (

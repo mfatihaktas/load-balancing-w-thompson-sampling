@@ -17,13 +17,13 @@ def test_AssignWithThompsonSampling(
 ):
     def assign_w_ts_sliding_win(server_list: list[server_module.Server]):
         return ts_module.AssignWithThompsonSampling_slidingWin(
-            node_id_list=[s._id for s in server_list],
+            node_list=server_list,
             win_len=100,
         )
 
     def assign_w_ts_reset_win_on_rare_event(server_list: list[server_module.Server]):
         return ts_module.AssignWithThompsonSampling_resetWinOnRareEvent(
-            node_id_list=[s._id for s in server_list],
+            node_list=server_list,
             win_len=100,
             threshold_prob_rare=0.9,
         )
@@ -45,17 +45,17 @@ def test_AssignWithThompsonSampling_slidingWin_vs_slidingWinForEachNode(
     inter_task_gen_time_rv: random_variable.RandomVariable,
     task_service_time_rv: random_variable.RandomVariable,
 ):
-    num_tasks_to_recv = 1000
+    num_tasks_to_recv = 100
     def sim_(win_len: int):
         def ts_sliding_win(server_list: list[server_module.Server]):
             return ts_module.AssignWithThompsonSampling_slidingWin(
-                node_id_list=[s._id for s in server_list],
+                node_list=server_list,
                 win_len=win_len,
             )
 
         def ts_sliding_win_for_each_node(server_list: list[server_module.Server]):
             return ts_module.AssignWithThompsonSampling_slidingWinForEachNode(
-                node_id_list=[s._id for s in server_list],
+                node_list=server_list,
                 win_len=win_len,
             )
 

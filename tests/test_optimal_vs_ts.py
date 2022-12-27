@@ -34,19 +34,19 @@ def optimal_vs_ts(
 
     def assign_w_ts_sliding_win(server_list: list[server_module.Server]):
         return ts_module.AssignWithThompsonSampling_slidingWin(
-            node_id_list=[s._id for s in server_list],
+            node_list=server_list,
             win_len=win_len,
         )
 
     def assign_w_ts_sliding_win_for_each_node(server_list: list[server_module.Server]):
         return ts_module.AssignWithThompsonSampling_slidingWinForEachNode(
-            node_id_list=[s._id for s in server_list],
+            node_list=server_list,
             win_len=win_len,
         )
 
     def assign_w_ts_reset_win_on_rare_event(server_list: list[server_module.Server]):
         return ts_module.AssignWithThompsonSampling_resetWinOnRareEvent(
-            node_id_list=[s._id for s in server_list],
+            node_list=server_list,
             win_len=win_len,
             threshold_prob_rare=0.9,
         )
@@ -111,7 +111,9 @@ def optimal_vs_ts(
 
     # Run the sim
     # arrival_rate_list = list(numpy.linspace(0.1, num_servers, num=4, endpoint=False))
-    arrival_rate_list = [0.1*num_servers, 0.5*num_servers, 0.8*num_servers]
+    # arrival_rate_list = [0.1*num_servers, 0.5*num_servers, 0.8*num_servers]
+    # arrival_rate_list = [0.5*num_servers, 0.8*num_servers]
+    arrival_rate_list = [0.1*num_servers, 0.25*num_servers, 0.5*num_servers, 0.65*num_servers, 0.8*num_servers]
     ET_random_list, std_T_random_list = [], []
     ET_ts_sliding_win_list, std_T_ts_sliding_win_list = [], []
     ET_ts_sliding_win_for_each_node_list, std_T_ts_sliding_win_for_each_node_list = [], []
@@ -259,6 +261,6 @@ if __name__ == "__main__":
         env=simpy.Environment(),
         num_servers=2,
         task_service_time_rv=random_variable.DiscreteUniform(min_value=1, max_value=1),
-        num_tasks_to_recv=1000, # 10000,
-        num_sim_runs=1,
+        num_tasks_to_recv=100, # 10000,
+        num_sim_runs=3,
     )

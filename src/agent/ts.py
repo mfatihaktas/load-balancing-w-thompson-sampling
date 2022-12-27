@@ -5,12 +5,13 @@ from typing import Tuple
 
 from src.agent import agent
 from src.prob import random_variable
+from src.sys import node
 from src.utils.debug import *
 
 
 class AssignWithThompsonSampling_slidingWin(agent.SchingAgent_wOnlineLearning):
-    def __init__(self, node_id_list: list[str], win_len: int):
-        super().__init__(node_id_list=node_id_list)
+    def __init__(self, node_list: list[node.Node], win_len: int):
+        super().__init__(node_list=node_list)
         self.win_len = win_len
 
         self.node_id_cost_queue = collections.deque(maxlen=win_len)
@@ -58,11 +59,11 @@ class AssignWithThompsonSampling_slidingWin(agent.SchingAgent_wOnlineLearning):
 
 
 class AssignWithThompsonSampling_slidingWinForEachNode(agent.SchingAgent_wOnlineLearning):
-    def __init__(self, node_id_list: list[str], win_len: int):
-        super().__init__(node_id_list=node_id_list)
+    def __init__(self, node_list: list[node.Node], win_len: int):
+        super().__init__(node_list=node_list)
         self.win_len = win_len
 
-        self.node_id_to_cost_queue_map = {node_id: collections.deque(maxlen=win_len) for node_id in node_id_list}
+        self.node_id_to_cost_queue_map = {node_id: collections.deque(maxlen=win_len) for node_id in self.node_id_list}
 
     def __repr__(self):
         return (
@@ -104,11 +105,11 @@ class AssignWithThompsonSampling_slidingWinForEachNode(agent.SchingAgent_wOnline
 
 
 class AssignWithThompsonSampling_resetWinOnRareEvent(AssignWithThompsonSampling_slidingWinForEachNode):
-    def __init__(self, node_id_list: list[str], win_len: int, threshold_prob_rare: float):
-        super().__init__(node_id_list=node_id_list, win_len=win_len)
+    def __init__(self, node_list: list[node.Node], win_len: int, threshold_prob_rare: float):
+        super().__init__(node_list=node_list, win_len=win_len)
         self.threshold_prob_rare = threshold_prob_rare
 
-        self.node_id_to_time_last_assigned_map = {node_id: 0 for node_id in node_id_list}
+        self.node_id_to_time_last_assigned_map = {node_id: 0 for node_id in self.node_id_list}
 
     def __repr__(self):
         return (
@@ -143,16 +144,18 @@ class AssignWithThompsonSampling_resetWinOnRareEvent(AssignWithThompsonSampling_
     def node_id_to_assign(self, time_epoch: float):
         log(DEBUG, "", node_id_to_cost_queue_map=self.node_id_to_cost_queue_map)
 
-        # Choose the node with min cost sample
+        # Choose the node with min-cost sample
         node_id_w_min_sample, min_sample = None, float("Inf")
         for node_id in self.node_id_to_cost_queue_map:
-            mean, stdev = self.mean_stdev_cost(node_id)
-            if mean >= time_epoch - self.node_id_to_time_last_assigned_map[node_id]:
-                log(DEBUG, "Mean >= time_epoch, resetting memory buffer", node_id=node_id)
+            _mean, _stdev = self.mean_stdev_cost(node_id)
+            mean = _mean - (time_epoch - self.node_id_to_time_last_assigned_map[node_id])
+            if mean <= 0:
+                log(DEBUG, "Mean < 0, resetting memory buffer", node_id=node_id)
                 self.node_id_to_cost_queue_map[node_id].clear()
                 node_id_w_min_sample = node_id
                 break
 
+            stdev = _stdev * (1 - mean / _mean)
             s = random_variable.TruncatedNormal(mu=mean, sigma=stdev).sample()
             if s < min_sample:
                 min_sample = s
