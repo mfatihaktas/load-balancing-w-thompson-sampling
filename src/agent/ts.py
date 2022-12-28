@@ -41,7 +41,7 @@ class AssignWithThompsonSampling_slidingWin(agent.SchingAgent_wOnlineLearning):
         log(DEBUG, "", node_id_to_costs_map=node_id_to_costs_map)
 
         # Choose the node with min cost sample
-        node_id_w_min_sample, min_sample = None, float("Inf")
+        node_id_to_return, min_sample = None, float("Inf")
         for node_id, cost_queue in node_id_to_costs_map.items():
             mean = numpy.mean(cost_queue) if len(cost_queue) else 0
             stdev = numpy.std(cost_queue) if len(cost_queue) else 1
@@ -52,10 +52,10 @@ class AssignWithThompsonSampling_slidingWin(agent.SchingAgent_wOnlineLearning):
             s = random_variable.TruncatedNormal(mu=mean, sigma=stdev).sample()
             if s < min_sample:
                 min_sample = s
-                node_id_w_min_sample = node_id
-                # log(DEBUG, "s < min_sample", s=s, min_sample=min_sample, node_id_w_min_sample=node_id_w_min_sample)
+                node_id_to_return = node_id
+                # log(DEBUG, "s < min_sample", s=s, min_sample=min_sample, node_id_to_return=node_id_to_return)
 
-        return node_id_w_min_sample
+        return node_id_to_return
 
 
 class AssignWithThompsonSampling_slidingWinForEachNode(agent.SchingAgent_wOnlineLearning):
@@ -91,17 +91,17 @@ class AssignWithThompsonSampling_slidingWinForEachNode(agent.SchingAgent_wOnline
         log(DEBUG, "", node_id_to_cost_queue_map=self.node_id_to_cost_queue_map)
 
         # Choose the node with min cost sample
-        node_id_w_min_sample, min_sample = None, float("Inf")
+        node_id_to_return, min_sample = None, float("Inf")
         for node_id in self.node_id_to_cost_queue_map:
             mean, stdev = self.mean_stdev_cost(node_id)
 
             s = random_variable.TruncatedNormal(mu=mean, sigma=stdev).sample()
             if s < min_sample:
                 min_sample = s
-                node_id_w_min_sample = node_id
-                # log(DEBUG, "s < min_sample", s=s, min_sample=min_sample, node_id_w_min_sample=node_id_w_min_sample)
+                node_id_to_return = node_id
+                # log(DEBUG, "s < min_sample", s=s, min_sample=min_sample, node_id_to_return=node_id_to_return)
 
-        return node_id_w_min_sample
+        return node_id_to_return
 
 
 class AssignWithThompsonSampling_resetWinOnRareEvent(AssignWithThompsonSampling_slidingWinForEachNode):
@@ -149,22 +149,24 @@ class AssignWithThompsonSampling_resetWinOnRareEvent(AssignWithThompsonSampling_
         )
 
         # Choose the node with min-cost sample
-        node_id_w_min_sample, min_sample = None, float("Inf")
+        node_id_to_return, min_sample = None, float("Inf")
         for node_id in self.node_id_to_cost_queue_map:
+            time_last_assigned = self.node_id_to_time_last_assigned_map[node_id]
+
             _mean, _stdev = self.mean_stdev_cost(node_id)
             mean = _mean - (time_epoch - self.node_id_to_time_last_assigned_map[node_id])
             if mean <= 0:
                 log(DEBUG, "Mean < 0, resetting memory buffer", node_id=node_id)
                 self.node_id_to_cost_queue_map[node_id].clear()
-                node_id_w_min_sample = node_id
-                break
+                s = mean
+            else:
+                stdev = _stdev * (1 - mean / _mean)
+                s = random_variable.TruncatedNormal(mu=mean, sigma=stdev).sample()
 
-            stdev = _stdev * (1 - mean / _mean)
-            s = random_variable.TruncatedNormal(mu=mean, sigma=stdev).sample()
             if s < min_sample:
                 min_sample = s
-                node_id_w_min_sample = node_id
-                # log(DEBUG, "s < min_sample", s=s, min_sample=min_sample, node_id_w_min_sample=node_id_w_min_sample)
+                node_id_to_return = node_id
+                # log(DEBUG, "s < min_sample", s=s, min_sample=min_sample, node_id_to_return=node_id_to_return)
 
-        self.node_id_to_time_last_assigned_map[node_id_w_min_sample] = time_epoch
-        return node_id_w_min_sample
+        self.node_id_to_time_last_assigned_map[node_id_to_return] = time_epoch
+        return node_id_to_return
