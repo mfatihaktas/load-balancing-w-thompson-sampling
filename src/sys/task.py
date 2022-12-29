@@ -12,10 +12,4 @@ class Task:
         self.node_id = None
 
     def __repr__(self):
-        # return (
-        #     "Msg( \n"
-        #     f"\t id= {self._id} \n"
-        #     ")"
-        # )
-
         return f"Task(id= {self._id}, service_time= {self.service_time})"

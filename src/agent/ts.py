@@ -3,7 +3,7 @@ import numpy
 
 from typing import Tuple
 
-from src.agent import agent
+from src.agent import agent, exp as exp_module
 from src.prob import random_variable
 from src.sys import node
 from src.utils.debug import *
@@ -14,7 +14,7 @@ class AssignWithThompsonSampling_slidingWin(agent.SchingAgent_wOnlineLearning):
         super().__init__(node_list=node_list)
         self.win_len = win_len
 
-        self.node_id_cost_queue = collections.deque(maxlen=win_len)
+        self.node_id_and_exp_queue = collections.deque(maxlen=win_len)
 
     def __repr__(self):
         return (
@@ -24,27 +24,27 @@ class AssignWithThompsonSampling_slidingWin(agent.SchingAgent_wOnlineLearning):
             ")"
         )
 
-    def record_cost(self, node_id: str, cost: float):
-        self.node_id_cost_queue.append((node_id, cost))
-        log(DEBUG, "recorded", node_id=node_id, cost=cost)
+    def record_exp(self, node_id: str, exp: exp_module.Exp):
+        self.node_id_and_exp_queue.append((node_id, exp))
+        log(DEBUG, "recorded", node_id=node_id, exp=exp)
 
     def node_id_to_assign(self, time_epoch: float=None):
-        # Construct `node_id_to_costs_map`
-        node_id_to_costs_map = collections.defaultdict(list)
-        for (node_id, cost) in self.node_id_cost_queue:
-            node_id_to_costs_map[node_id].append(cost)
+        # Construct `node_id_to_wait_times_map`
+        node_id_to_wait_times_map = collections.defaultdict(list)
+        for (node_id, exp) in self.node_id_and_exp_queue:
+            node_id_to_wait_times_map[node_id].append(exp.wait_time)
 
         for node_id in self.node_id_list:
-            if node_id not in node_id_to_costs_map:
-                node_id_to_costs_map[node_id].append(0)
+            if node_id not in node_id_to_wait_times_map:
+                node_id_to_wait_times_map[node_id].append(0)
 
-        log(DEBUG, "", node_id_to_costs_map=node_id_to_costs_map)
+        log(DEBUG, "", node_id_to_wait_times_map=node_id_to_wait_times_map)
 
-        # Choose the node with min cost sample
+        # Choose the node with min wait time sample
         node_id_to_return, min_sample = None, float("Inf")
-        for node_id, cost_queue in node_id_to_costs_map.items():
-            mean = numpy.mean(cost_queue) if len(cost_queue) else 0
-            stdev = numpy.std(cost_queue) if len(cost_queue) else 1
+        for node_id, wait_times in node_id_to_wait_times_map.items():
+            mean = numpy.mean(wait_times) if len(wait_times) else 0
+            stdev = numpy.std(wait_times) if len(wait_times) else 1
             check(stdev >= 0, "Stdev cannot be negative")
             if stdev == 0:
                 stdev = 1
@@ -63,7 +63,7 @@ class AssignWithThompsonSampling_slidingWinForEachNode(agent.SchingAgent_wOnline
         super().__init__(node_list=node_list)
         self.win_len = win_len
 
-        self.node_id_to_cost_queue_map = {node_id: collections.deque(maxlen=win_len) for node_id in self.node_id_list}
+        self.node_id_to_exp_queue_map = {node_id: collections.deque(maxlen=win_len) for node_id in self.node_id_list}
 
     def __repr__(self):
         return (
@@ -73,27 +73,27 @@ class AssignWithThompsonSampling_slidingWinForEachNode(agent.SchingAgent_wOnline
             ")"
         )
 
-    def mean_stdev_cost(self, node_id: str) -> Tuple[float, float]:
-        cost_queue = self.node_id_to_cost_queue_map[node_id]
-        mean = numpy.mean(cost_queue) if len(cost_queue) else 0
-        stdev = numpy.std(cost_queue) if len(cost_queue) else 0.01
+    def mean_stdev_wait_time(self, node_id: str) -> Tuple[float, float]:
+        wait_times = [exp.wait_time for exp in self.node_id_to_exp_queue_map[node_id]]
+        mean = numpy.mean(wait_times) if len(wait_times) else 0
+        stdev = numpy.std(wait_times) if len(wait_times) else 0.01
         check(stdev >= 0, "Stdev cannot be negative")
         if stdev == 0:
             stdev = 0.01
 
         return mean, stdev
 
-    def record_cost(self, node_id: str, cost: float):
-        self.node_id_to_cost_queue_map[node_id].append(cost)
-        log(DEBUG, "recorded", node_id=node_id, cost=cost)
+    def record_exp(self, node_id: str, exp: exp_module.Exp):
+        self.node_id_to_exp_queue_map[node_id].append(exp)
+        log(DEBUG, "recorded", node_id=node_id, exp=exp)
 
     def node_id_to_assign(self, time_epoch: float=None):
-        log(DEBUG, "", node_id_to_cost_queue_map=self.node_id_to_cost_queue_map)
+        log(DEBUG, "", node_id_to_exp_queue_map=self.node_id_to_exp_queue_map)
 
-        # Choose the node with min cost sample
+        # Choose the node with min wait time sample
         node_id_to_return, min_sample = None, float("Inf")
-        for node_id in self.node_id_to_cost_queue_map:
-            mean, stdev = self.mean_stdev_cost(node_id)
+        for node_id in self.node_id_to_exp_queue_map:
+            mean, stdev = self.mean_stdev_wait_time(node_id)
 
             s = random_variable.TruncatedNormal(mu=mean, sigma=stdev).sample()
             if s < min_sample:
@@ -120,16 +120,16 @@ class AssignWithThompsonSampling_resetWinOnRareEvent(AssignWithThompsonSampling_
             ")"
         )
 
-    def record_cost(self, node_id: str, cost: float):
+    def record_exp(self, node_id: str, exp: exp_module.Exp):
         def record():
-            self.node_id_to_cost_queue_map[node_id].append(cost)
-            log(DEBUG, "recorded", node_id=node_id, cost=cost)
+            self.node_id_to_exp_queue_map[node_id].append(exp)
+            log(DEBUG, "recorded", node_id=node_id, exp=exp)
 
-        if len(self.node_id_to_cost_queue_map[node_id]) < 5:
+        if len(self.node_id_to_exp_queue_map[node_id]) < 5:
             record()
 
         else:
-            mean, stdev = self.mean_stdev_cost(node_id)
+            mean, stdev = self.mean_stdev_wait_time(node_id)
             cost_rv = random_variable.TruncatedNormal(mu=mean, sigma=stdev)
 
             Pr_getting_larger_than_cost = cost_rv.tail_prob(cost)
@@ -137,27 +137,27 @@ class AssignWithThompsonSampling_resetWinOnRareEvent(AssignWithThompsonSampling_
             Pr_cost_is_rare = 1 - min(Pr_getting_larger_than_cost, Pr_getting_smaller_than_cost)
             if Pr_cost_is_rare >= self.threshold_prob_rare:
                 log(DEBUG, "Rare event detected", cost=cost, mean=mean, stdev=stdev, Pr_cost_is_rare=Pr_cost_is_rare, threshold_prob_rare=self.threshold_prob_rare)
-                self.node_id_to_cost_queue_map[node_id].clear()
+                self.node_id_to_exp_queue_map[node_id].clear()
             else:
                 record()
 
     def node_id_to_assign(self, time_epoch: float):
         log(DEBUG, "",
-            node_id_to_cost_queue_map=self.node_id_to_cost_queue_map,
+            node_id_to_exp_queue_map=self.node_id_to_exp_queue_map,
             node_list=[node.repr_w_state() for node in self.node_list],
             time_epoch=time_epoch,
         )
 
         # Choose the node with min-cost sample
         node_id_to_return, min_sample = None, float("Inf")
-        for node_id in self.node_id_to_cost_queue_map:
+        for node_id in self.node_id_to_exp_queue_map:
             time_last_assigned = self.node_id_to_time_last_assigned_map[node_id]
 
-            _mean, _stdev = self.mean_stdev_cost(node_id)
+            _mean, _stdev = self.mean_stdev_wait_time(node_id)
             mean = _mean - (time_epoch - self.node_id_to_time_last_assigned_map[node_id])
             if mean <= 0:
                 log(DEBUG, "Mean < 0, resetting memory buffer", node_id=node_id)
-                self.node_id_to_cost_queue_map[node_id].clear()
+                self.node_id_to_exp_queue_map[node_id].clear()
                 s = mean
             else:
                 stdev = _stdev * (1 - mean / _mean)

@@ -1,6 +1,7 @@
 import abc
 
 from src.sys import node
+from src.agent import exp as exp_module
 
 
 class SchingAgent(abc.ABC):
@@ -29,5 +30,5 @@ class SchingAgent_wOnlineLearning(SchingAgent):
         )
 
     @abc.abstractmethod
-    def record_cost(self, node_id: str, cost: float):
+    def record_exp(self, node_id: str, exp: exp_module.Exp):
         return None

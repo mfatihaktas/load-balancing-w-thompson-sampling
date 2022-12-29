@@ -1,6 +1,9 @@
 import simpy
 
-from src.agent import agent
+from src.agent import (
+    agent,
+    exp as exp_module,
+)
 from src.sys import (
     node,
     task as task_module,
@@ -23,7 +26,6 @@ class Sink(node.Node):
         self.task_store = simpy.Store(env)
         self.recv_tasks_proc = env.process(self.recv_tasks())
 
-        # self.task_wait_time_list = []
         self.task_response_time_list = []
 
     def __repr__(self):
@@ -47,12 +49,9 @@ class Sink(node.Node):
                 response_time = self.env.now - task.arrival_time
                 self.task_response_time_list.append(response_time)
 
-                wait_time = self.env.now - task.arrival_time - task.service_time
-                # self.task_wait_time_list.append(wait_time)
-
                 if isinstance(self.sching_agent, agent.SchingAgent_wOnlineLearning):
-                    # self.sching_agent.record_cost(node_id=task.node_id, cost=response_time)
-                    self.sching_agent.record_cost(node_id=task.node_id, cost=wait_time)
+                    exp = exp_module.get_exp(time_epoch=self.env.now, task=task)
+                    self.sching_agent.record_exp(node_id=task.node_id, exp=exp)
 
             if num_tasks_recved >= self.num_tasks_to_recv:
                 slog(DEBUG, self.env, self, "recved requested # tasks", num_tasks_recved=num_tasks_recved)

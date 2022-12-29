@@ -24,6 +24,7 @@ def optimal_vs_ts(
 ):
     log(INFO, "Started",
         num_servers=num_servers,
+        task_service_time_rv=task_service_time_rv,
         num_tasks_to_recv=num_tasks_to_recv,
         num_sim_runs=num_sim_runs,
     )
@@ -111,9 +112,9 @@ def optimal_vs_ts(
 
     # Run the sim
     # arrival_rate_list = list(numpy.linspace(0.1, num_servers, num=4, endpoint=False))
-    # arrival_rate_list = [0.1*num_servers, 0.5*num_servers, 0.8*num_servers]
+    arrival_rate_list = [0.1*num_servers, 0.5*num_servers, 0.8*num_servers]
     # arrival_rate_list = [0.5*num_servers, 0.8*num_servers]
-    arrival_rate_list = [0.1*num_servers, 0.25*num_servers, 0.5*num_servers, 0.65*num_servers, 0.8*num_servers]
+    # arrival_rate_list = [0.1*num_servers, 0.25*num_servers, 0.5*num_servers, 0.65*num_servers, 0.8*num_servers]
     ET_random_list, std_T_random_list = [], []
     ET_ts_sliding_win_list, std_T_ts_sliding_win_list = [], []
     ET_ts_sliding_win_for_each_node_list, std_T_ts_sliding_win_for_each_node_list = [], []
@@ -236,7 +237,7 @@ def optimal_vs_ts(
         r"$N_{\textrm{sim}}= " + f"{num_sim_runs}$"
     )
     plot.gcf().set_size_inches(15, 6)
-    plot.savefig("plot_optimal_vs_ts_ET_vs_lambda.png", bbox_extra_artists=(suptitle,), bbox_inches="tight")
+    plot.savefig(f"plot_optimal_vs_ts_ET_vs_lambda_taskServiceTime_{type(task_service_time_rv).__name__}.png", bbox_extra_artists=(suptitle,), bbox_inches="tight")
     plot.gcf().clear()
 
     log(INFO, "Done")
@@ -252,15 +253,16 @@ def test_optimal_vs_ts(
         num_servers=num_servers,
         task_service_time_rv=task_service_time_rv,
         num_tasks_to_recv=1000,
-        num_sim_runs=3,
+        num_sim_runs=1,
     )
 
 
 if __name__ == "__main__":
     optimal_vs_ts(
         env=simpy.Environment(),
-        num_servers=2,
-        task_service_time_rv=random_variable.DiscreteUniform(min_value=1, max_value=1),
-        num_tasks_to_recv=100, # 10000,
-        num_sim_runs=3,
+        num_servers=10,
+        # task_service_time_rv=random_variable.DiscreteUniform(min_value=1, max_value=1),
+        task_service_time_rv=random_variable.Exponential(mu=1),
+        num_tasks_to_recv=10000, # 10000,
+        num_sim_runs=1,
     )
