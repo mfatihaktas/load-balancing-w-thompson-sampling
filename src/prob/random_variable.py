@@ -83,9 +83,9 @@ class Exponential(RandomVariable):
 
     def to_latex(self) -> str:
         if self.D == 0:
-            return r"{}(\mu={})".format("\textrm{Exp}", self.mu)
+            return r"\textrm{Exp}" + f"(\mu={self.mu})"
 
-        return r"{} + {}(\mu={})".format(self.D, "\textrm{Exp}", self.mu)
+        return f"{self.D}" + r"\textrm{Exp}" + f"(\mu={self.mu})"
 
     def tail_prob(self, x: float) -> float:
         if x <= self.min_value:
